@@ -47,7 +47,7 @@ func (ar *AutoResponder) AddOrUpdateRule(rule *Rule) {
 			return err
 		}
 
-		return b.Put([]byte(rule.URLPattern), buf)
+		return b.Put([]byte(rule.URLPattern+rule.Method), buf)
 	})
 }
 
@@ -64,23 +64,21 @@ func (ar *AutoResponder) GetRule(urlPattern string, method string) *Rule {
 		}
 
 		for k, v := c.First(); k != nil; k, v = c.Next() {
-			if !wildcard.Match(string(k), urlPattern) {
-				continue
-			}
-			var rule *Rule
-			err := json.Unmarshal(v, rule)
+			var rule Rule
+			err := json.Unmarshal(v, &rule)
 
 			if err != nil {
 				continue
 			}
 
-			if !wildcard.Match(rule.Method, method) {
+			if !wildcard.Match(rule.URLPattern, urlPattern) &&
+				!wildcard.Match(rule.Method, method) {
 				continue
 			}
 
 			rule.Response = ar.GetResponse(rule.ResponseID)
 
-			extractedRule = rule
+			extractedRule = &rule
 			return nil
 		}
 
@@ -94,24 +92,61 @@ func (ar *AutoResponder) GetRule(urlPattern string, method string) *Rule {
 func (ar *AutoResponder) GetRules() []*Rule {
 	var rules []*Rule
 	ar.db.View(func(tx *bolt.Tx) error {
-		tx.CreateBucketIfNotExists(ruleBucketName)
-		c := tx.Bucket(ruleBucketName).Cursor()
+		b := tx.Bucket(ruleBucketName)
+		if b == nil {
+			return nil
+		}
+
+		c := b.Cursor()
+		if c == nil {
+			return nil
+		}
 
 		for k, v := c.First(); k != nil; k, v = c.Next() {
 
-			var rule *Rule
-			err := json.Unmarshal(v, rule)
-
+			var rule Rule
+			err := json.Unmarshal(v, &rule)
 			if err != nil {
 				continue
 			}
-			rules = append(rules, rule)
+			rules = append(rules, &rule)
 		}
 
 		return nil
 	})
 
 	return rules
+}
+
+//RemoveRule removes the rule
+func (ar *AutoResponder) RemoveRule(urlPattern string, method string) {
+	ar.db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket(ruleBucketName)
+
+		c := b.Cursor()
+
+		if c == nil {
+			return nil
+		}
+
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			var rule Rule
+			err := json.Unmarshal(v, &rule)
+
+			if err != nil {
+				continue
+			}
+
+			if !wildcard.Match(rule.URLPattern, urlPattern) &&
+				!wildcard.Match(rule.Method, method) {
+				continue
+			}
+
+			return c.Delete()
+		}
+
+		return nil
+	})
 }
 
 //AddOrUpdateResponse adds or updates given rule
@@ -131,13 +166,16 @@ func (ar *AutoResponder) AddOrUpdateResponse(response *Response) {
 
 //GetResponse gets the response with given id
 func (ar *AutoResponder) GetResponse(id int) *Response {
-	var response *Response
+	var response Response
 	ar.db.View(func(tx *bolt.Tx) error {
-		tx.CreateBucketIfNotExists(responseBucketName)
+		b := tx.Bucket(responseBucketName)
+		if b == nil {
+			return nil
+		}
 
-		v := tx.Bucket(responseBucketName).Get(itob(id))
+		v := b.Get(itob(id))
 
-		err := json.Unmarshal(v, response)
+		err := json.Unmarshal(v, &response)
 
 		if err != nil {
 			return err
@@ -146,31 +184,51 @@ func (ar *AutoResponder) GetResponse(id int) *Response {
 		return nil
 	})
 
-	return response
+	return &response
 }
 
 //GetResponses gets the response slice
 func (ar *AutoResponder) GetResponses() []*Response {
 	var responses []*Response
 	ar.db.View(func(tx *bolt.Tx) error {
-		tx.CreateBucketIfNotExists(responseBucketName)
-		c := tx.Bucket(responseBucketName).Cursor()
+
+		b := tx.Bucket(responseBucketName)
+		if b == nil {
+			return nil
+		}
+
+		c := b.Cursor()
+		if c == nil {
+			return nil
+		}
 
 		for k, v := c.First(); k != nil; k, v = c.Next() {
 
-			var response *Response
-			err := json.Unmarshal(v, response)
+			var response Response
+			err := json.Unmarshal(v, &response)
 
 			if err != nil {
 				continue
 			}
-			responses = append(responses, response)
+			responses = append(responses, &response)
 		}
 
 		return nil
 	})
 
 	return responses
+}
+
+//RemoveResponse removes the response with given id
+func (ar *AutoResponder) RemoveResponse(id int) {
+	ar.db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket(responseBucketName)
+		if b == nil {
+			return nil
+		}
+
+		return b.Delete(itob(id))
+	})
 }
 
 func itob(v int) []byte {

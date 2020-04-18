@@ -8,29 +8,119 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-    <title>Hello, world!</title>
+    <title>HTTP Auto Responder</title>
   </head>
   <body>
-    <main role="main" class="container mt-3">
+    <main role="main" class="container mt-3" id="autoResponderVue">
+        <h1 class="display-4 text-center">HTTP Auto Responder</h1>
         <div class="jumbotron">
-          <h1>Attack!</h1>
           <div class="row">
-            <div class="col-md-12 mb-3">
-                <form action="/save-rule" method="POST">
-                    <input type="text" class="form-control" id="URLPattern" name="URLPattern" placeholder="Put your URL pattern!" value="" required="">
-                    <select class="form-control" name="Method" id="Method">
-                        <option value="GET">GET</option>
-                        <option value="POST">POST</option>
-                        <option value="PUT">PUT</option>
-                        <option value="DELETE">DELETE</option>
-                    </select>
-                    <div class="col-md-12 mb-3">
-                        <button class="btn btn-primary" type="submit" id="startAttack">Start Attack</button>
-                    </div>
-                </form>
+              <div class="col-md-6"  id="rules">
+                <div class="row">
+                    <div class="col-md-6"><h2>Rules <small v-if="rules != undefined && rules.length > 0" v-text="'('+rules.length+')'"></small></h2></div>
+                    <div class="col-md-6"><button class="btn btn-primary btn-sm float-right" data-toggle="modal" data-target="#ruleCreateModal">Add new Rule</button></div>
+                </div>
+
+                <div v-if="rules == undefined || rules.length == 0">
+                    <hr/>
+                      No rule created yet!
+                  </div>
+                  <div v-if="rules != undefined && rules.length > 0">
+                    <table  class="table">
+                        <tr>
+                            <th>URL Pattern</th>
+                            <th>Method</th>
+                            <th></th>
+                        </tr>
+                        <tr v-for="rule, index in rules" v-bind:data-index="index">
+                            <td v-text="rule.urlPattern"></td>
+                            <td v-text="rule.method"></td>
+                            <td>
+                                <a href="javascript:void(0)" @click="removeRule">
+                                <svg class="bi bi-x" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M11.854 4.146a.5.5 0 010 .708l-7 7a.5.5 0 01-.708-.708l7-7a.5.5 0 01.708 0z" clip-rule="evenodd"/>
+                                    <path fill-rule="evenodd" d="M4.146 4.146a.5.5 0 000 .708l7 7a.5.5 0 00.708-.708l-7-7a.5.5 0 00-.708 0z" clip-rule="evenodd"/>
+                                  </svg>
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+              </div>
+              <div class="col-md-6"  id="responses">
+                <div class="row">
+                    <div class="col-md-6"><h2>Responses <small v-if="responses != undefined && responses.length > 0" v-text="'('+responses.length+')'"></small></h2></div>
+                    <div class="col-md-6"><button class="btn btn-primary btn-sm float-right" data-toggle="modal" data-target="#responseCreateModal">Add new Response</button></div>
+                </div>
+
+                <div v-if="responses == undefined || responses.length == 0">
+                    <hr/>
+                      No response created yet!
+                  </div>
+                  <div v-if="responses != undefined && responses.length > 0">
+                    <table  class="table">
+                        <tr>
+                            <th>Label</th>
+                            <th></th>
+                        </tr>
+                        <tr v-for="response in responses" v-bind:data-id="response.id">
+                            <td v-text="response.label"></td>
+                            <td>
+                                <a href="javascript:void(0)" @click="removeItem">
+                                <svg class="bi bi-x" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M11.854 4.146a.5.5 0 010 .708l-7 7a.5.5 0 01-.708-.708l7-7a.5.5 0 01.708 0z" clip-rule="evenodd"/>
+                                    <path fill-rule="evenodd" d="M4.146 4.146a.5.5 0 000 .708l7 7a.5.5 0 00.708-.708l-7-7a.5.5 0 00-.708 0z" clip-rule="evenodd"/>
+                                  </svg>
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+              </div>
               
+          </div>
+
+          <div class="modal" id="ruleCreateModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Rule Editor</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    <form action="/save-rule" method="POST" id="rulesFrm">
+                        <div class="form-group">
+                            <label>URL Pattern</label>
+                            <input type="text" class="form-control" id="URLPattern" name="URLPattern" placeholder="Put your URL pattern!" value="" required="">
+                        </div>
+                    <div class="form-group">
+                        <label>HTTP Method</label>
+                        <select class="form-control" name="Method" id="Method">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="DELETE">DELETE</option>
+                            <option value="HEAD">HEAD</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Response</label><button class="btn btn-secondary btn-sm float-right" style="margin-top: -3px;">Create new Response</button>
+                        <select class="form-control" name="ResponseId" id="ResponseId" v-for="response, index in responses">
+                            <option v-bind:value="response.id" v-text="response.label"></option>
+                        </select>
+                    </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-primary" id="createRule" data-dismiss="modal">Save changes</button>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+              </div>
             </div>
           </div>
+
         </div>
       </main>
 
@@ -42,8 +132,72 @@
   crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
     <script type="text/javaScript">
 
+$(function () {
+    $("#createRule").click(function(){
+        $.ajax({
+                url: '/save-rule',
+                type : "POST",
+                dataType : 'json',
+                data : JSON.stringify(getFormData($("#rulesFrm"))),
+                success : function(result) {
+                    autoResponderVue.loadRules();
+                },
+                error: function(xhr, resp, text) {
+                    console.log(xhr, resp, text);
+                }
+            })
+    })
+});
+
+var autoResponderVue = new Vue({
+    el: "#autoResponderVue",
+    data: {
+        rules: [],
+        responses: []
+        },
+    methods:{
+        loadRules: function(){
+            $.get("/get-rules", function(data){
+                autoResponderVue.rules = data;
+            });
+        },
+        loadResponses: function(){
+            $.get("/get-responses", function(data){
+                autoResponderVue.responses = data;
+            });
+        },
+        removeRule: function(){
+            var rule = this.rules[$(event.target).parents("tr").data("index")]
+            $.get("/remove-rule?urlPattern=" + rule.urlPattern + "&method=" + rule.method, function(data){
+                autoResponderVue.loadRules();
+            });
+        },
+        removeResponse: function () {
+            var response = this.responses[$(event.target).parents("tr").data("id")]
+            $.get("/remove-response?id=" + response.id, function(data){
+                autoResponderVue.loadResponses();
+            });
+        }
+    }
+});
+
+
+autoResponderVue.loadRules();
+autoResponderVue.loadResponses();
+
+function getFormData($form){
+    var unindexed_array = $form.serializeArray();
+    var indexed_array = {};
+
+    $.map(unindexed_array, function(n, i){
+        indexed_array[n['name']] = n['value'];
+    });
+
+    return indexed_array;
+}
     </script>
   </body>
 </html>

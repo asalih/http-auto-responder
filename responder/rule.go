@@ -4,10 +4,11 @@ import "net/http"
 
 //Rule ...
 type Rule struct {
-	URLPattern string
-	Method     string
-	ResponseID int
-	Response   *Response
+	URLPattern string    `json:"urlPattern"`
+	Method     string    `json:"method"`
+	ResponseID int       `json:"responseID"`
+	IsActive   bool      `json:"isActive"`
+	Response   *Response `json:"-"`
 }
 
 func (r *Rule) Write(w http.ResponseWriter) {
