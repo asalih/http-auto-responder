@@ -28,9 +28,19 @@ func (handler *AutoResponderHTTPHandler) ServeHTTP(w http.ResponseWriter, r *htt
 		return
 	}
 
-	rule := handler.AutoResponder.GetRule(r.URL.String(), r.Method)
+	url := r.Host
 
-	if rule == nil || !rule.IsActive {
+	if r.TLS != nil {
+		url = "https://" + url
+	} else {
+		url = "http://" + url
+	}
+
+	url += r.URL.String()
+
+	rule := handler.AutoResponder.FindMatchingRule(url, r.Method)
+
+	if rule == nil {
 		http.NotFound(w, r)
 		return
 	}

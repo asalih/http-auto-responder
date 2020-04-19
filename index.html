@@ -13,29 +13,75 @@
   <body>
     <main role="main" class="container mt-3" id="autoResponderVue">
         <h1 class="display-4 text-center">HTTP Auto Responder</h1>
-        <div class="jumbotron">
+        <hr>
           <div class="row">
-              <div class="col-md-6"  id="rules">
-                <div class="row">
-                    <div class="col-md-6"><h2>Rules <small v-if="rules != undefined && rules.length > 0" v-text="'('+rules.length+')'"></small></h2></div>
-                    <div class="col-md-6"><button class="btn btn-primary btn-sm float-right" data-toggle="modal" data-target="#ruleCreateModal">Add new Rule</button></div>
-                </div>
+            <div class="col-md-6"  id="responses">
+                <div class="jumbotron">
+                    <div class="row">
+                    <div class="col-md-6"><h2>Responses <small v-if="responses != undefined && responses.length > 0" v-text="'('+responses.length+')'"></small></h2></div>
+                    <div class="col-md-6"><button class="btn btn-primary btn-sm float-right" data-toggle="modal" data-target="#responseCreateModal">Add new Response</button></div>
+                    </div>
 
-                <div v-if="rules == undefined || rules.length == 0">
+                    <div v-if="responses == undefined || responses.length == 0">
                     <hr/>
-                      No rule created yet!
-                  </div>
-                  <div v-if="rules != undefined && rules.length > 0">
+                      No response created yet!
+                    </div>
+                    <div v-if="responses != undefined && responses.length > 0">
                     <table  class="table">
                         <tr>
-                            <th>URL Pattern</th>
-                            <th>Method</th>
+                            <th scope="col" style="width: 45%;">Label</th>
+                            <th scope="col" style="width: 40%;">Status Code</th>
+                            <th scope="col"></th>
+                        </tr>
+                        <tr v-for="response, index in responses" v-bind:data-index="index">
+                            <td v-text="response.label"></td>
+                            <td v-text="response.statusCode"></td>
+                            <td>
+                                <a href="javascript:void(0)" @click="editResponse">
+                                    <svg class="bi bi-pencil-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M15.502 1.94a.5.5 0 010 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 01.707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 00-.121.196l-.805 2.414a.25.25 0 00.316.316l2.414-.805a.5.5 0 00.196-.12l6.813-6.814z"/>
+                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 002.5 15h11a1.5 1.5 0 001.5-1.5v-6a.5.5 0 00-1 0v6a.5.5 0 01-.5.5h-11a.5.5 0 01-.5-.5v-11a.5.5 0 01.5-.5H9a.5.5 0 000-1H2.5A1.5 1.5 0 001 2.5v11z" clip-rule="evenodd"/>
+                                      </svg>
+                                </a>
+                                <a href="javascript:void(0)" @click="removeResponse">
+                                <svg class="bi bi-x" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M11.854 4.146a.5.5 0 010 .708l-7 7a.5.5 0 01-.708-.708l7-7a.5.5 0 01.708 0z" clip-rule="evenodd"/>
+                                    <path fill-rule="evenodd" d="M4.146 4.146a.5.5 0 000 .708l7 7a.5.5 0 00.708-.708l-7-7a.5.5 0 00-.708 0z" clip-rule="evenodd"/>
+                                  </svg>
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                    </div>
+                </div>
+              </div>
+              <div class="col-md-6"  id="rules">
+                <div class="jumbotron">
+                    <div class="row">
+                    <div class="col-md-6"><h2>Rules <small v-if="rules != undefined && rules.length > 0" v-text="'('+rules.length+')'"></small></h2></div>
+                    <div class="col-md-6"><button class="btn btn-primary btn-sm float-right" data-toggle="modal" data-target="#ruleCreateModal">Add new Rule</button></div>
+                    </div>
+                    <div v-if="rules == undefined || rules.length == 0">
+                    <hr/>
+                      No rule created yet!
+                    </div>
+                    <div v-if="rules != undefined && rules.length > 0">
+                    <table  class="table">
+                        <tr>
+                            <th style="width: 45%;">URL Pattern</th>
+                            <th style="width: 40%;">Method</th>
                             <th></th>
                         </tr>
                         <tr v-for="rule, index in rules" v-bind:data-index="index">
                             <td v-text="rule.urlPattern"></td>
                             <td v-text="rule.method"></td>
                             <td>
+                                <a href="javascript:void(0)" @click="editRule">
+                                    <svg class="bi bi-pencil-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M15.502 1.94a.5.5 0 010 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 01.707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 00-.121.196l-.805 2.414a.25.25 0 00.316.316l2.414-.805a.5.5 0 00.196-.12l6.813-6.814z"/>
+                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 002.5 15h11a1.5 1.5 0 001.5-1.5v-6a.5.5 0 00-1 0v6a.5.5 0 01-.5.5h-11a.5.5 0 01-.5-.5v-11a.5.5 0 01.5-.5H9a.5.5 0 000-1H2.5A1.5 1.5 0 001 2.5v11z" clip-rule="evenodd"/>
+                                      </svg>
+                                </a>
                                 <a href="javascript:void(0)" @click="removeRule">
                                 <svg class="bi bi-x" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" d="M11.854 4.146a.5.5 0 010 .708l-7 7a.5.5 0 01-.708-.708l7-7a.5.5 0 01.708 0z" clip-rule="evenodd"/>
@@ -45,39 +91,9 @@
                             </td>
                         </tr>
                     </table>
+                    </div>
                 </div>
               </div>
-              <div class="col-md-6"  id="responses">
-                <div class="row">
-                    <div class="col-md-6"><h2>Responses <small v-if="responses != undefined && responses.length > 0" v-text="'('+responses.length+')'"></small></h2></div>
-                    <div class="col-md-6"><button class="btn btn-primary btn-sm float-right" data-toggle="modal" data-target="#responseCreateModal">Add new Response</button></div>
-                </div>
-
-                <div v-if="responses == undefined || responses.length == 0">
-                    <hr/>
-                      No response created yet!
-                  </div>
-                  <div v-if="responses != undefined && responses.length > 0">
-                    <table  class="table">
-                        <tr>
-                            <th>Label</th>
-                            <th></th>
-                        </tr>
-                        <tr v-for="response in responses" v-bind:data-id="response.id">
-                            <td v-text="response.label"></td>
-                            <td>
-                                <a href="javascript:void(0)" @click="removeItem">
-                                <svg class="bi bi-x" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" d="M11.854 4.146a.5.5 0 010 .708l-7 7a.5.5 0 01-.708-.708l7-7a.5.5 0 01.708 0z" clip-rule="evenodd"/>
-                                    <path fill-rule="evenodd" d="M4.146 4.146a.5.5 0 000 .708l7 7a.5.5 0 00.708-.708l-7-7a.5.5 0 00-.708 0z" clip-rule="evenodd"/>
-                                  </svg>
-                                </a>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-              </div>
-              
           </div>
 
           <div class="modal" id="ruleCreateModal" tabindex="-1" role="dialog">
@@ -90,14 +106,18 @@
                   </button>
                 </div>
                 <div class="modal-body">
-                    <form action="/save-rule" method="POST" id="rulesFrm">
+                    <ul v-for="e in errors">
+                        <li v-text="e"></li>
+                    </ul>
+                    <form id="rulesFrm" v-if="responses && responses.length > 0">
+                        <input type="hidden" class="form-control" id="RuleID" name="ID" value=""  v-model="rule.id" required="">
                         <div class="form-group">
                             <label>URL Pattern</label>
-                            <input type="text" class="form-control" id="URLPattern" name="URLPattern" placeholder="Put your URL pattern!" value="" required="">
+                            <input type="text" class="form-control" v-model="rule.urlPattern" id="URLPattern" name="URLPattern" placeholder="Put your URL pattern!" value="" required="">
                         </div>
                     <div class="form-group">
                         <label>HTTP Method</label>
-                        <select class="form-control" name="Method" id="Method">
+                        <select class="form-control" name="Method" id="Method" v-model="rule.method">
                             <option value="GET">GET</option>
                             <option value="POST">POST</option>
                             <option value="PUT">PUT</option>
@@ -106,21 +126,82 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Select Response</label><button class="btn btn-secondary btn-sm float-right" style="margin-top: -3px;">Create new Response</button>
-                        <select class="form-control" name="ResponseId" id="ResponseId" v-for="response, index in responses">
-                            <option v-bind:value="response.id" v-text="response.label"></option>
+                        <label>Select Response</label><button type="button" class="btn btn-light btn-sm float-right" style="margin-top: -3px;"> Create new Response</button>
+                        <select class="form-control" name="ResponseID" id="ResponseID" required="" v-model="rule.responseID" >
+                            <option v-for="response, index in responses" v-bind:value="response.id" v-text="response.label"></option>
                         </select>
                     </div>
                     </form>
+                    <div v-if="!responses || responses.length == 0">
+                        Create a response first!
+                    </div>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn btn-primary" id="createRule" data-dismiss="modal">Save changes</button>
+                  <button type="button" class="btn btn-primary" v-if="responses && responses.length > 0" @click="saveRule">Save changes</button>
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
               </div>
             </div>
           </div>
 
+          <div class="modal" id="responseCreateModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Response Editor</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    <ul v-for="e in errors">
+                        <li v-text="e"></li>
+                    </ul>
+                    <form method="POST" id="responseFrm">
+                        <input type="hidden" class="form-control" id="ID" name="ID" value=""  v-model="response.id">
+                        <div class="form-group">
+                            <label>Label</label>
+                            <input type="text" class="form-control"  v-model="response.label" id="Label" name="Label" placeholder="Label" value="">
+                        </div>
+                        <div class="form-group">
+                            <label>Status Code</label>
+                            <input type="number" class="form-control"  v-model.number="response.statusCode" id="StatusCode" name="StatusCode" placeholder="Status Code">
+                        </div>
+                    <div class="form-group">
+                        <label>HTTP Headers</label><button type="button" @click="appendHeader" class="btn btn-light btn-sm float-right" style="margin-top: -3px;">Add new Header</button>
+                        <div style="max-height: 300px;overflow: hidden auto;">
+                        <div class="row mt-3" v-for="header, index in response.headers"  >
+                            <div class="col-md-5">
+                                <input type="text" class="form-control"  v-model="header.key" placeholder="Key" />
+                            </div>
+                            <div class="col-md-5">
+                                <input type="text" class="form-control"  v-model="header.value" placeholder="Value" />
+                            </div>
+                            <div class="col-md-2">
+                                <a href="javascript:void(0)" @click="removeHeader" v-bind:data-index="index">
+                                    <svg class="bi bi-x" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M11.854 4.146a.5.5 0 010 .708l-7 7a.5.5 0 01-.708-.708l7-7a.5.5 0 01.708 0z" clip-rule="evenodd"/>
+                                        <path fill-rule="evenodd" d="M4.146 4.146a.5.5 0 000 .708l7 7a.5.5 0 00.708-.708l-7-7a.5.5 0 00-.708 0z" clip-rule="evenodd"/>
+                                      </svg>
+                                    </a>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Body</label>
+                        <textarea class="form-control" name="ResponseBody" id="ResponseBody" v-model="response.body"> </textarea>
+                    </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-primary" id="createResponse" @click="saveResponse">Save changes</button>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
         </div>
       </main>
 
@@ -136,27 +217,20 @@
     <script type="text/javaScript">
 
 $(function () {
-    $("#createRule").click(function(){
-        $.ajax({
-                url: '/save-rule',
-                type : "POST",
-                dataType : 'json',
-                data : JSON.stringify(getFormData($("#rulesFrm"))),
-                success : function(result) {
-                    autoResponderVue.loadRules();
-                },
-                error: function(xhr, resp, text) {
-                    console.log(xhr, resp, text);
-                }
-            })
-    })
+    
 });
+
+var defaultRule = function(){return {}}
+var defaultResponse = function(){return {statusCode:200, headers:[{key: "", value:""}]}}
 
 var autoResponderVue = new Vue({
     el: "#autoResponderVue",
     data: {
         rules: [],
-        responses: []
+        responses: [],
+        rule:defaultRule(),
+        response:defaultResponse(),
+        errors:[]
         },
     methods:{
         loadRules: function(){
@@ -164,40 +238,105 @@ var autoResponderVue = new Vue({
                 autoResponderVue.rules = data;
             });
         },
+        removeRule: function(){
+            var rule = this.rules[$(event.target).parents("tr").data("index")]
+            $.get("/remove-rule?id=" + rule.id, function(data){
+                autoResponderVue.loadRules();
+            });
+        },
+        editRule: function () {
+            this.rule = this.rules[$(event.target).parents("tr").data("index")]
+            $("#ruleCreateModal").modal("show");
+        },
         loadResponses: function(){
             $.get("/get-responses", function(data){
                 autoResponderVue.responses = data;
             });
         },
-        removeRule: function(){
-            var rule = this.rules[$(event.target).parents("tr").data("index")]
-            $.get("/remove-rule?urlPattern=" + rule.urlPattern + "&method=" + rule.method, function(data){
-                autoResponderVue.loadRules();
-            });
+        editResponse: function () {
+            this.response = this.responses[$(event.target).parents("tr").data("index")]
+            $("#responseCreateModal").modal("show");
         },
         removeResponse: function () {
-            var response = this.responses[$(event.target).parents("tr").data("id")]
+            var response = this.responses[$(event.target).parents("tr").data("index")]
             $.get("/remove-response?id=" + response.id, function(data){
                 autoResponderVue.loadResponses();
             });
+        },
+        appendHeader: function(){
+            this.response.headers.push({key:"",value:""})
+        },
+        removeHeader: function () {
+            this.response.headers.splice($(event.target).parents("a").data("index"), 1)
+        },
+        saveRule: function () {
+            if(this.rule.urlPattern == null || this.rule.urlPattern == ""){
+                this.errors.push("URL Pattern is required!");
+            }
+            
+            let m = ["HEAD", "GET","POST", "PUT", "DELETE"]
+            if(m.indexOf(this.rule.method) == -1){
+                this.errors.push("Method is required!");
+            }
+
+            if(this.rule.urlPattern == null || this.rule.urlPattern == ""){
+                this.errors.push("URL Pattern is required!");
+            }
+            
+            if(this.rule.responseID == null){
+                this.errors.push("Response is required!");
+            }
+
+            if (this.errors.length > 0){
+                event.preventDefault();
+                return false;
+            }
+
+            $.ajax({
+                url: '/save-rule',
+                type : "POST",
+                dataType : 'json',
+                data : JSON.stringify(this.rule),
+                success : function(result) {
+                    autoResponderVue.loadRules();
+                    $("#ruleCreateModal").modal("hide");
+                },
+                error: function(xhr, resp, text) {
+                    console.log(xhr, resp, text);
+                }
+            })
+        },
+        saveResponse: function () {
+            if(this.response.label == null || this.response.label== ""){
+                this.errors.push("Response label is required!");
+                return false;
+            }
+            $.ajax({
+                url: '/save-response',
+                type : "POST",
+                dataType : 'json',
+                data : JSON.stringify(this.response),
+                success : function(result) {
+                    autoResponderVue.loadResponses();
+                    $("#responseCreateModal").modal("hide");
+                },
+                error: function(xhr, resp, text) {
+                    console.log(xhr, resp, text);
+                }
+            })
         }
     }
 });
 
+$("#responseCreateModal, #ruleCreateModal").on('hidden.bs.modal', function () {
+    autoResponderVue.rule = defaultRule();
+    autoResponderVue.response = defaultResponse();
+    autoResponderVue.errors = []
+});
 
 autoResponderVue.loadRules();
 autoResponderVue.loadResponses();
 
-function getFormData($form){
-    var unindexed_array = $form.serializeArray();
-    var indexed_array = {};
-
-    $.map(unindexed_array, function(n, i){
-        indexed_array[n['name']] = n['value'];
-    });
-
-    return indexed_array;
-}
     </script>
   </body>
 </html>

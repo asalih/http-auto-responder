@@ -37,7 +37,7 @@ func init() {
 		w.Header().Set("Content-Type", "application/json")
 
 		idq := r.URL.Query().Get("id")
-		id, err := strconv.Atoi(idq)
+		id, err := strconv.ParseUint(idq, 0, 64)
 
 		if err != nil || idq == "" {
 			http.NotFound(w, r)
@@ -54,7 +54,7 @@ func init() {
 		w.Header().Set("Content-Type", "application/json")
 
 		idq := r.URL.Query().Get("id")
-		id, err := strconv.Atoi(idq)
+		id, err := strconv.ParseUint(idq, 0, 64)
 
 		if err != nil {
 			http.NotFound(w, r)

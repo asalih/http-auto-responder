@@ -3,6 +3,7 @@ package web
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/asalih/http-auto-responder/responder"
 )
@@ -36,15 +37,15 @@ func init() {
 	HTTPHandlerFuncs["/get-rule"] = func(w http.ResponseWriter, r *http.Request, ar *responder.AutoResponder) {
 		w.Header().Set("Content-Type", "application/json")
 
-		pattern := r.URL.Query().Get("pattern")
-		method := r.URL.Query().Get("method")
+		idq := r.URL.Query().Get("id")
+		id, err := strconv.ParseUint(idq, 0, 64)
 
-		if method == "" || pattern == "" {
+		if err != nil || idq == "" {
 			http.NotFound(w, r)
 			return
 		}
 
-		rule := ar.GetRule(pattern, method)
+		rule := ar.GetRule(id)
 
 		encoder := json.NewEncoder(w)
 		encoder.Encode(rule)
@@ -53,15 +54,15 @@ func init() {
 	HTTPHandlerFuncs["/remove-rule"] = func(w http.ResponseWriter, r *http.Request, ar *responder.AutoResponder) {
 		w.Header().Set("Content-Type", "application/json")
 
-		pattern := r.URL.Query().Get("urlPattern")
-		method := r.URL.Query().Get("method")
+		idq := r.URL.Query().Get("id")
+		id, err := strconv.ParseUint(idq, 0, 64)
 
-		if method == "" || pattern == "" {
+		if err != nil || idq == "" {
 			http.NotFound(w, r)
 			return
 		}
 
-		ar.RemoveRule(pattern, method)
+		ar.RemoveRule(id)
 
 		w.Write([]byte(`{"status": "OK"}`))
 	}

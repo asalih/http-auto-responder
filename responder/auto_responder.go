@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"log"
+	"strings"
 
 	bolt "github.com/etcd-io/bbolt"
 	"github.com/minio/minio/pkg/wildcard"
@@ -42,20 +43,29 @@ func (ar *AutoResponder) AddOrUpdateRule(rule *Rule) {
 		tx.CreateBucketIfNotExists(ruleBucketName)
 		b := tx.Bucket(ruleBucketName)
 
+		if rule.ID == 0 {
+			id, _ := b.NextSequence()
+			rule.ID = id
+		}
+
 		buf, err := json.Marshal(rule)
 		if err != nil {
 			return err
 		}
 
-		return b.Put([]byte(rule.URLPattern+rule.Method), buf)
+		return b.Put(itob(rule.ID), buf)
 	})
 }
 
-//GetRule gets the rule with given url pattern and http method
-func (ar *AutoResponder) GetRule(urlPattern string, method string) *Rule {
+//FindMatchingRule gets the rule with given url pattern and http method
+func (ar *AutoResponder) FindMatchingRule(urlPattern string, method string) *Rule {
 	var extractedRule *Rule
 	ar.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(ruleBucketName)
+
+		if b == nil {
+			return nil
+		}
 
 		c := b.Cursor()
 
@@ -71,7 +81,12 @@ func (ar *AutoResponder) GetRule(urlPattern string, method string) *Rule {
 				continue
 			}
 
-			if !wildcard.Match(rule.URLPattern, urlPattern) &&
+			if !rule.IsActive {
+				continue
+			}
+
+			if (!strings.Contains(urlPattern, rule.URLPattern) &&
+				!wildcard.Match(rule.URLPattern, urlPattern)) ||
 				!wildcard.Match(rule.Method, method) {
 				continue
 			}
@@ -86,6 +101,29 @@ func (ar *AutoResponder) GetRule(urlPattern string, method string) *Rule {
 	})
 
 	return extractedRule
+}
+
+//GetRule gets the rule with given id
+func (ar *AutoResponder) GetRule(id uint64) *Rule {
+	var rule Rule
+	ar.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(ruleBucketName)
+		if b == nil {
+			return nil
+		}
+
+		v := b.Get(itob(id))
+
+		err := json.Unmarshal(v, &rule)
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return &rule
 }
 
 //GetRules gets the rules with given url pattern and http method
@@ -119,33 +157,15 @@ func (ar *AutoResponder) GetRules() []*Rule {
 }
 
 //RemoveRule removes the rule
-func (ar *AutoResponder) RemoveRule(urlPattern string, method string) {
+func (ar *AutoResponder) RemoveRule(id uint64) {
 	ar.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(ruleBucketName)
 
-		c := b.Cursor()
-
-		if c == nil {
+		if b == nil {
 			return nil
 		}
 
-		for k, v := c.First(); k != nil; k, v = c.Next() {
-			var rule Rule
-			err := json.Unmarshal(v, &rule)
-
-			if err != nil {
-				continue
-			}
-
-			if !wildcard.Match(rule.URLPattern, urlPattern) &&
-				!wildcard.Match(rule.Method, method) {
-				continue
-			}
-
-			return c.Delete()
-		}
-
-		return nil
+		return b.Delete(itob(id))
 	})
 }
 
@@ -154,6 +174,11 @@ func (ar *AutoResponder) AddOrUpdateResponse(response *Response) {
 	ar.db.Update(func(tx *bolt.Tx) error {
 		tx.CreateBucketIfNotExists(responseBucketName)
 		b := tx.Bucket(responseBucketName)
+
+		if response.ID == 0 {
+			id, _ := b.NextSequence()
+			response.ID = id
+		}
 
 		buf, err := json.Marshal(response)
 		if err != nil {
@@ -165,7 +190,7 @@ func (ar *AutoResponder) AddOrUpdateResponse(response *Response) {
 }
 
 //GetResponse gets the response with given id
-func (ar *AutoResponder) GetResponse(id int) *Response {
+func (ar *AutoResponder) GetResponse(id uint64) *Response {
 	var response Response
 	ar.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(responseBucketName)
@@ -220,7 +245,7 @@ func (ar *AutoResponder) GetResponses() []*Response {
 }
 
 //RemoveResponse removes the response with given id
-func (ar *AutoResponder) RemoveResponse(id int) {
+func (ar *AutoResponder) RemoveResponse(id uint64) {
 	ar.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(responseBucketName)
 		if b == nil {
@@ -231,7 +256,7 @@ func (ar *AutoResponder) RemoveResponse(id int) {
 	})
 }
 
-func itob(v int) []byte {
+func itob(v uint64) []byte {
 	b := make([]byte, 8)
 	binary.BigEndian.PutUint64(b, uint64(v))
 	return b
