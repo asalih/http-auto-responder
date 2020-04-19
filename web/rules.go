@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	HTTPHandlerFuncs["/save-rule"] = func(w http.ResponseWriter, r *http.Request, ar *responder.AutoResponder) {
+	HTTPHandlerFuncs["/http-auto-responder/save-rule"] = func(w http.ResponseWriter, r *http.Request, ar *responder.AutoResponder) {
 		w.Header().Set("Content-Type", "application/json")
 
 		decoder := json.NewDecoder(r.Body)
@@ -25,7 +25,7 @@ func init() {
 		w.Write([]byte(`{"status": "OK"}`))
 	}
 
-	HTTPHandlerFuncs["/get-rules"] = func(w http.ResponseWriter, r *http.Request, ar *responder.AutoResponder) {
+	HTTPHandlerFuncs["/http-auto-responder/get-rules"] = func(w http.ResponseWriter, r *http.Request, ar *responder.AutoResponder) {
 		w.Header().Set("Content-Type", "application/json")
 
 		rules := ar.GetRules()
@@ -34,7 +34,7 @@ func init() {
 		encoder.Encode(rules)
 	}
 
-	HTTPHandlerFuncs["/get-rule"] = func(w http.ResponseWriter, r *http.Request, ar *responder.AutoResponder) {
+	HTTPHandlerFuncs["/http-auto-responder/get-rule"] = func(w http.ResponseWriter, r *http.Request, ar *responder.AutoResponder) {
 		w.Header().Set("Content-Type", "application/json")
 
 		idq := r.URL.Query().Get("id")
@@ -51,7 +51,7 @@ func init() {
 		encoder.Encode(rule)
 	}
 
-	HTTPHandlerFuncs["/remove-rule"] = func(w http.ResponseWriter, r *http.Request, ar *responder.AutoResponder) {
+	HTTPHandlerFuncs["/http-auto-responder/remove-rule"] = func(w http.ResponseWriter, r *http.Request, ar *responder.AutoResponder) {
 		w.Header().Set("Content-Type", "application/json")
 
 		idq := r.URL.Query().Get("id")

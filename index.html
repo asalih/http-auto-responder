@@ -286,13 +286,13 @@ var autoResponderVue = new Vue({
         },
     methods:{
         loadRules: function(){
-            $.get("/get-rules", function(data){
+            $.get("/http-auto-responder/get-rules", function(data){
                 autoResponderVue.rules = data;
             });
         },
         removeRule: function(){
             var rule = this.rules[$(event.target).parents("tr").data("index")]
-            $.get("/remove-rule?id=" + rule.id, function(data){
+            $.get("/http-auto-responder/remove-rule?id=" + rule.id, function(data){
                 autoResponderVue.loadRules();
             });
         },
@@ -301,7 +301,7 @@ var autoResponderVue = new Vue({
             $("#ruleCreateModal").modal("show");
         },
         loadResponses: function(){
-            $.get("/get-responses", function(data){
+            $.get("/http-auto-responder/get-responses", function(data){
                 autoResponderVue.responses = data;
             });
         },
@@ -311,7 +311,7 @@ var autoResponderVue = new Vue({
         },
         removeResponse: function () {
             var response = this.responses[$(event.target).parents("tr").data("index")]
-            $.get("/remove-response?id=" + response.id, function(data){
+            $.get("/http-auto-responder/remove-response?id=" + response.id, function(data){
                 autoResponderVue.loadResponses();
             });
         },
@@ -345,9 +345,9 @@ var autoResponderVue = new Vue({
             }
 
             $.ajax({
-                url: '/save-rule',
+                url: "/http-auto-responder/save-rule",
                 type : "POST",
-                dataType : 'json',
+                dataType : "json",
                 data : JSON.stringify(this.rule),
                 success : function(result) {
                     autoResponderVue.loadRules();
@@ -364,9 +364,9 @@ var autoResponderVue = new Vue({
                 return false;
             }
             $.ajax({
-                url: '/save-response',
+                url: "/http-auto-responder/save-response",
                 type : "POST",
-                dataType : 'json',
+                dataType : "json",
                 data : JSON.stringify(this.response),
                 success : function(result) {
                     autoResponderVue.loadResponses();
