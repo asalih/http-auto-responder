@@ -1,224 +1,276 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
     <title>HTTP Auto Responder</title>
-  </head>
-  <body>
+</head>
+
+<body>
     <main role="main" class="container mt-3" id="autoResponderVue">
         <h1 class="display-4 text-center">HTTP Auto Responder</h1>
         <hr>
-          <div class="row">
-            <div class="col-md-6"  id="responses">
+        <div class="row">
+            <div class="col-md-6" id="responses">
                 <div class="jumbotron">
                     <div class="row">
-                    <div class="col-md-6"><h2>Responses <small v-if="responses != undefined && responses.length > 0" v-text="'('+responses.length+')'"></small></h2></div>
-                    <div class="col-md-6"><button class="btn btn-primary btn-sm float-right" data-toggle="modal" data-target="#responseCreateModal">Add new Response</button></div>
+                        <div class="col-md-6">
+                            <h2>Responses <small v-if="responses != undefined && responses.length > 0"
+                                    v-text="'('+responses.length+')'"></small></h2>
+                        </div>
+                        <div class="col-md-6"><button class="btn btn-primary btn-sm float-right" data-toggle="modal"
+                                data-target="#responseCreateModal">Add new Response</button></div>
                     </div>
 
                     <div v-if="responses == undefined || responses.length == 0">
-                    <hr/>
-                      No response created yet!
+                        <hr />
+                        No response created yet!
                     </div>
                     <div v-if="responses != undefined && responses.length > 0">
-                    <table  class="table">
-                        <tr>
-                            <th scope="col" style="width: 45%;">Label</th>
-                            <th scope="col" style="width: 40%;">Status Code</th>
-                            <th scope="col"></th>
-                        </tr>
-                        <tr v-for="response, index in responses" v-bind:data-index="index">
-                            <td v-text="response.label"></td>
-                            <td v-text="response.statusCode"></td>
-                            <td>
-                                <a href="javascript:void(0)" @click="editResponse">
-                                    <svg class="bi bi-pencil-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M15.502 1.94a.5.5 0 010 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 01.707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 00-.121.196l-.805 2.414a.25.25 0 00.316.316l2.414-.805a.5.5 0 00.196-.12l6.813-6.814z"/>
-                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 002.5 15h11a1.5 1.5 0 001.5-1.5v-6a.5.5 0 00-1 0v6a.5.5 0 01-.5.5h-11a.5.5 0 01-.5-.5v-11a.5.5 0 01.5-.5H9a.5.5 0 000-1H2.5A1.5 1.5 0 001 2.5v11z" clip-rule="evenodd"/>
-                                      </svg>
-                                </a>
-                                <a href="javascript:void(0)" @click="removeResponse">
-                                <svg class="bi bi-x" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" d="M11.854 4.146a.5.5 0 010 .708l-7 7a.5.5 0 01-.708-.708l7-7a.5.5 0 01.708 0z" clip-rule="evenodd"/>
-                                    <path fill-rule="evenodd" d="M4.146 4.146a.5.5 0 000 .708l7 7a.5.5 0 00.708-.708l-7-7a.5.5 0 00-.708 0z" clip-rule="evenodd"/>
-                                  </svg>
-                                </a>
-                            </td>
-                        </tr>
-                    </table>
+                        <table class="table">
+                            <tr>
+                                <th scope="col" style="width: 45%;">Label</th>
+                                <th scope="col" style="width: 40%;">Status Code</th>
+                                <th scope="col"></th>
+                            </tr>
+                            <tr v-for="response, index in responses" v-bind:data-index="index">
+                                <td v-text="response.label"></td>
+                                <td v-text="response.statusCode"></td>
+                                <td>
+                                    <a href="javascript:void(0)" @click="editResponse">
+                                        <svg class="bi bi-pencil-square" width="1em" height="1em" viewBox="0 0 16 16"
+                                            fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M15.502 1.94a.5.5 0 010 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 01.707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 00-.121.196l-.805 2.414a.25.25 0 00.316.316l2.414-.805a.5.5 0 00.196-.12l6.813-6.814z" />
+                                            <path fill-rule="evenodd"
+                                                d="M1 13.5A1.5 1.5 0 002.5 15h11a1.5 1.5 0 001.5-1.5v-6a.5.5 0 00-1 0v6a.5.5 0 01-.5.5h-11a.5.5 0 01-.5-.5v-11a.5.5 0 01.5-.5H9a.5.5 0 000-1H2.5A1.5 1.5 0 001 2.5v11z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </a>
+                                    <a href="javascript:void(0)" @click="removeResponse">
+                                        <svg class="bi bi-x" width="1em" height="1em" viewBox="0 0 16 16"
+                                            fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd"
+                                                d="M11.854 4.146a.5.5 0 010 .708l-7 7a.5.5 0 01-.708-.708l7-7a.5.5 0 01.708 0z"
+                                                clip-rule="evenodd" />
+                                            <path fill-rule="evenodd"
+                                                d="M4.146 4.146a.5.5 0 000 .708l7 7a.5.5 0 00.708-.708l-7-7a.5.5 0 00-.708 0z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
-              </div>
-              <div class="col-md-6"  id="rules">
+            </div>
+            <div class="col-md-6" id="rules">
                 <div class="jumbotron">
                     <div class="row">
-                    <div class="col-md-6"><h2>Rules <small v-if="rules != undefined && rules.length > 0" v-text="'('+rules.length+')'"></small></h2></div>
-                    <div class="col-md-6"><button class="btn btn-primary btn-sm float-right" data-toggle="modal" data-target="#ruleCreateModal">Add new Rule</button></div>
+                        <div class="col-md-6">
+                            <h2>Rules <small v-if="rules != undefined && rules.length > 0"
+                                    v-text="'('+rules.length+')'"></small></h2>
+                        </div>
+                        <div class="col-md-6"><button class="btn btn-primary btn-sm float-right" data-toggle="modal"
+                                data-target="#ruleCreateModal">Add new Rule</button></div>
                     </div>
                     <div v-if="rules == undefined || rules.length == 0">
-                    <hr/>
-                      No rule created yet!
+                        <hr />
+                        No rule created yet!
                     </div>
                     <div v-if="rules != undefined && rules.length > 0">
-                    <table  class="table">
-                        <tr>
-                            <th style="width: 45%;">URL Pattern</th>
-                            <th style="width: 40%;">Method</th>
-                            <th></th>
-                        </tr>
-                        <tr v-for="rule, index in rules" v-bind:data-index="index">
-                            <td v-text="rule.urlPattern"></td>
-                            <td v-text="rule.method"></td>
-                            <td>
-                                <a href="javascript:void(0)" @click="editRule">
-                                    <svg class="bi bi-pencil-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M15.502 1.94a.5.5 0 010 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 01.707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 00-.121.196l-.805 2.414a.25.25 0 00.316.316l2.414-.805a.5.5 0 00.196-.12l6.813-6.814z"/>
-                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 002.5 15h11a1.5 1.5 0 001.5-1.5v-6a.5.5 0 00-1 0v6a.5.5 0 01-.5.5h-11a.5.5 0 01-.5-.5v-11a.5.5 0 01.5-.5H9a.5.5 0 000-1H2.5A1.5 1.5 0 001 2.5v11z" clip-rule="evenodd"/>
-                                      </svg>
-                                </a>
-                                <a href="javascript:void(0)" @click="removeRule">
-                                <svg class="bi bi-x" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" d="M11.854 4.146a.5.5 0 010 .708l-7 7a.5.5 0 01-.708-.708l7-7a.5.5 0 01.708 0z" clip-rule="evenodd"/>
-                                    <path fill-rule="evenodd" d="M4.146 4.146a.5.5 0 000 .708l7 7a.5.5 0 00.708-.708l-7-7a.5.5 0 00-.708 0z" clip-rule="evenodd"/>
-                                  </svg>
-                                </a>
-                            </td>
-                        </tr>
-                    </table>
-                    </div>
-                </div>
-              </div>
-          </div>
-
-          <div class="modal" id="ruleCreateModal" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">Rule Editor</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                    <ul v-for="e in errors">
-                        <li v-text="e"></li>
-                    </ul>
-                    <form id="rulesFrm" v-if="responses && responses.length > 0">
-                        <input type="hidden" class="form-control" id="RuleID" name="ID" value=""  v-model="rule.id" required="">
-                        <div class="form-group">
-                            <label>URL Pattern</label>
-                            <input type="text" class="form-control" v-model="rule.urlPattern" id="URLPattern" name="URLPattern" placeholder="Put your URL pattern!" value="" required="">
-                        </div>
-                    <div class="form-group">
-                        <label>HTTP Method</label>
-                        <select class="form-control" name="Method" id="Method" v-model="rule.method">
-                            <option value="GET">GET</option>
-                            <option value="POST">POST</option>
-                            <option value="PUT">PUT</option>
-                            <option value="DELETE">DELETE</option>
-                            <option value="HEAD">HEAD</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Select Response</label><button type="button" class="btn btn-light btn-sm float-right" style="margin-top: -3px;"> Create new Response</button>
-                        <select class="form-control" name="ResponseID" id="ResponseID" required="" v-model="rule.responseID" >
-                            <option v-for="response, index in responses" v-bind:value="response.id" v-text="response.label"></option>
-                        </select>
-                    </div>
-                    </form>
-                    <div v-if="!responses || responses.length == 0">
-                        Create a response first!
-                    </div>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-primary" v-if="responses && responses.length > 0" @click="saveRule">Save changes</button>
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="modal" id="responseCreateModal" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">Response Editor</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                    <ul v-for="e in errors">
-                        <li v-text="e"></li>
-                    </ul>
-                    <form method="POST" id="responseFrm">
-                        <input type="hidden" class="form-control" id="ID" name="ID" value=""  v-model="response.id">
-                        <div class="form-group">
-                            <label>Label</label>
-                            <input type="text" class="form-control"  v-model="response.label" id="Label" name="Label" placeholder="Label" value="">
-                        </div>
-                        <div class="form-group">
-                            <label>Status Code</label>
-                            <input type="number" class="form-control"  v-model.number="response.statusCode" id="StatusCode" name="StatusCode" placeholder="Status Code">
-                        </div>
-                    <div class="form-group">
-                        <label>HTTP Headers</label><button type="button" @click="appendHeader" class="btn btn-light btn-sm float-right" style="margin-top: -3px;">Add new Header</button>
-                        <div style="max-height: 300px;overflow: hidden auto;">
-                        <div class="row mt-3" v-for="header, index in response.headers"  >
-                            <div class="col-md-5">
-                                <input type="text" class="form-control"  v-model="header.key" placeholder="Key" />
-                            </div>
-                            <div class="col-md-5">
-                                <input type="text" class="form-control"  v-model="header.value" placeholder="Value" />
-                            </div>
-                            <div class="col-md-2">
-                                <a href="javascript:void(0)" @click="removeHeader" v-bind:data-index="index">
-                                    <svg class="bi bi-x" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" d="M11.854 4.146a.5.5 0 010 .708l-7 7a.5.5 0 01-.708-.708l7-7a.5.5 0 01.708 0z" clip-rule="evenodd"/>
-                                        <path fill-rule="evenodd" d="M4.146 4.146a.5.5 0 000 .708l7 7a.5.5 0 00.708-.708l-7-7a.5.5 0 00-.708 0z" clip-rule="evenodd"/>
-                                      </svg>
+                        <table class="table">
+                            <tr>
+                                <th style="width: 45%;">URL Pattern</th>
+                                <th style="width: 40%;">Method</th>
+                                <th></th>
+                            </tr>
+                            <tr v-for="rule, index in rules" v-bind:data-index="index">
+                                <td v-text="rule.urlPattern"></td>
+                                <td v-text="rule.method"></td>
+                                <td>
+                                    <a href="javascript:void(0)" @click="editRule">
+                                        <svg class="bi bi-pencil-square" width="1em" height="1em" viewBox="0 0 16 16"
+                                            fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M15.502 1.94a.5.5 0 010 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 01.707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 00-.121.196l-.805 2.414a.25.25 0 00.316.316l2.414-.805a.5.5 0 00.196-.12l6.813-6.814z" />
+                                            <path fill-rule="evenodd"
+                                                d="M1 13.5A1.5 1.5 0 002.5 15h11a1.5 1.5 0 001.5-1.5v-6a.5.5 0 00-1 0v6a.5.5 0 01-.5.5h-11a.5.5 0 01-.5-.5v-11a.5.5 0 01.5-.5H9a.5.5 0 000-1H2.5A1.5 1.5 0 001 2.5v11z"
+                                                clip-rule="evenodd" />
+                                        </svg>
                                     </a>
+                                    <a href="javascript:void(0)" @click="removeRule">
+                                        <svg class="bi bi-x" width="1em" height="1em" viewBox="0 0 16 16"
+                                            fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd"
+                                                d="M11.854 4.146a.5.5 0 010 .708l-7 7a.5.5 0 01-.708-.708l7-7a.5.5 0 01.708 0z"
+                                                clip-rule="evenodd" />
+                                            <path fill-rule="evenodd"
+                                                d="M4.146 4.146a.5.5 0 000 .708l7 7a.5.5 0 00.708-.708l-7-7a.5.5 0 00-.708 0z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="ruleCreateModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Rule Editor</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <ul v-for="e in errors">
+                            <li v-text="e"></li>
+                        </ul>
+                        <form id="rulesFrm" v-if="responses && responses.length > 0">
+                            <input type="hidden" class="form-control" id="RuleID" name="ID" value="" v-model="rule.id"
+                                required="">
+                            <div class="form-group">
+                                <label>URL Pattern</label>
+                                <input type="text" class="form-control" v-model="rule.urlPattern" id="URLPattern"
+                                    name="URLPattern" placeholder="Put your URL pattern!" value="" required="">
                             </div>
+                            <div class="form-group">
+                                <label>HTTP Method</label>
+                                <select class="form-control" name="Method" id="Method" v-model="rule.method">
+                                    <option value="GET">GET</option>
+                                    <option value="POST">POST</option>
+                                    <option value="PUT">PUT</option>
+                                    <option value="DELETE">DELETE</option>
+                                    <option value="HEAD">HEAD</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Select Response</label><button type="button"
+                                    class="btn btn-light btn-sm float-right" style="margin-top: -3px;"> Create new
+                                    Response</button>
+                                <select class="form-control" name="ResponseID" id="ResponseID" required=""
+                                    v-model="rule.responseID">
+                                    <option v-for="response, index in responses" v-bind:value="response.id"
+                                        v-text="response.label"></option>
+                                </select>
+                            </div>
+                        </form>
+                        <div v-if="!responses || responses.length == 0">
+                            Create a response first!
                         </div>
                     </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" v-if="responses && responses.length > 0"
+                            @click="saveRule">Save changes</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>
-                    <div class="form-group">
-                        <label>Body</label>
-                        <textarea class="form-control" name="ResponseBody" id="ResponseBody" v-model="response.body"> </textarea>
-                    </div>
-                    </form>
                 </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-primary" id="createResponse" @click="saveResponse">Save changes</button>
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-              </div>
             </div>
-          </div>
-          
         </div>
-      </main>
+
+        <div class="modal" id="responseCreateModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Response Editor</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <ul v-for="e in errors">
+                            <li v-text="e"></li>
+                        </ul>
+                        <form method="POST" id="responseFrm">
+                            <input type="hidden" class="form-control" id="ID" name="ID" value="" v-model="response.id">
+                            <div class="form-group">
+                                <label>Label</label>
+                                <input type="text" class="form-control" v-model="response.label" id="Label" name="Label"
+                                    placeholder="Label" value="">
+                            </div>
+                            <div class="form-group">
+                                <label>Status Code</label>
+                                <input type="number" class="form-control" v-model.number="response.statusCode"
+                                    id="StatusCode" name="StatusCode" placeholder="Status Code">
+                            </div>
+                            <div class="form-group">
+                                <label>HTTP Headers</label><button type="button" @click="appendHeader"
+                                    class="btn btn-light btn-sm float-right" style="margin-top: -3px;">Add new
+                                    Header</button>
+                                <div style="max-height: 300px;overflow: hidden auto;">
+                                    <div class="row mt-3" v-for="header, index in response.headers">
+                                        <div class="col-md-5">
+                                            <input type="text" class="form-control" v-model="header.key"
+                                                placeholder="Key" />
+                                        </div>
+                                        <div class="col-md-5">
+                                            <input type="text" class="form-control" v-model="header.value"
+                                                placeholder="Value" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="javascript:void(0)" @click="removeHeader"
+                                                v-bind:data-index="index">
+                                                <svg class="bi bi-x" width="1em" height="1em" viewBox="0 0 16 16"
+                                                    fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                    <path fill-rule="evenodd"
+                                                        d="M11.854 4.146a.5.5 0 010 .708l-7 7a.5.5 0 01-.708-.708l7-7a.5.5 0 01.708 0z"
+                                                        clip-rule="evenodd" />
+                                                    <path fill-rule="evenodd"
+                                                        d="M4.146 4.146a.5.5 0 000 .708l7 7a.5.5 0 00.708-.708l-7-7a.5.5 0 00-.708 0z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Body</label>
+                                <textarea class="form-control" name="ResponseBody" id="ResponseBody"
+                                    v-model="response.body"> </textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="createResponse" @click="saveResponse">Save
+                            changes</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+    </main>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script
-  src="https://code.jquery.com/jquery-3.4.1.min.js"
-  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
-  crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
     <script type="text/javaScript">
 
 $(function () {
     
-});
+
 
 var defaultRule = function(){return {}}
 var defaultResponse = function(){return {statusCode:200, headers:[{key: "", value:""}]}}
@@ -336,7 +388,8 @@ $("#responseCreateModal, #ruleCreateModal").on('hidden.bs.modal', function () {
 
 autoResponderVue.loadRules();
 autoResponderVue.loadResponses();
-
+});
     </script>
-  </body>
+</body>
+
 </html>
