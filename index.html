@@ -9,7 +9,14 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
+    <style type="text/css">
+        .text-len{
+            max-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+        }
+    </style>
     <title>HTTP Auto Responder</title>
 </head>
 
@@ -17,6 +24,14 @@
     <main role="main" class="container mt-3" id="autoResponderVue">
         <h1 class="display-4 text-center">HTTP Auto Responder</h1>
         <hr>
+        <div class="alert alert-primary">
+            <form action="/http-auto-responder/import" method="POST" enctype="multipart/form-data">
+                <strong>IMPORT Fiddler .saz File: </strong>
+                    <input type="file" name="uploadFile" accept=".saz" style="width: 73%;margin-left: 2%;" />
+                    <button type="submit" class="btn btn-primary">Send</button>
+                
+            </form>
+        </div>
         <div class="row">
             <div class="col-md-6" id="responses">
                 <div class="jumbotron">
@@ -41,7 +56,7 @@
                                 <th scope="col"></th>
                             </tr>
                             <tr v-for="response, index in responses" v-bind:data-index="index">
-                                <td v-text="response.label"></td>
+                                <td class="text-len" v-text="response.label"></td>
                                 <td v-text="response.statusCode"></td>
                                 <td>
                                     <a href="javascript:void(0)" @click="editResponse">
@@ -88,12 +103,12 @@
                     <div v-if="rules != undefined && rules.length > 0">
                         <table class="table">
                             <tr>
-                                <th style="width: 45%;">URL Pattern</th>
-                                <th style="width: 40%;">Method</th>
+                                <th style="width: 60%;">URL Pattern</th>
+                                <th style="width: 25%;">Method</th>
                                 <th></th>
                             </tr>
                             <tr v-for="rule, index in rules" v-bind:data-index="index">
-                                <td v-text="rule.urlPattern"></td>
+                                <td class="text-len" v-text="rule.urlPattern"></td>
                                 <td v-text="rule.method"></td>
                                 <td>
                                     <a href="javascript:void(0)" @click="editRule">
@@ -126,7 +141,7 @@
         </div>
 
         <div class="modal" id="ruleCreateModal" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
+            <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Rule Editor</h5>
@@ -154,6 +169,7 @@
                                     <option value="PUT">PUT</option>
                                     <option value="DELETE">DELETE</option>
                                     <option value="HEAD">HEAD</option>
+                                    <option value="TRACE">TRACE</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -181,7 +197,7 @@
         </div>
 
         <div class="modal" id="responseCreateModal" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
+            <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Response Editor</h5>
@@ -206,7 +222,7 @@
                                     id="StatusCode" name="StatusCode" placeholder="Status Code">
                             </div>
                             <div class="form-group">
-                                <label>HTTP Headers</label><button type="button" @click="appendHeader"
+                                <label>HTTP Headers <span v-if="response.headers.length > 0" v-text="'('+response.headers.length+')'"></span></label><button type="button" @click="appendHeader"
                                     class="btn btn-light btn-sm float-right" style="margin-top: -3px;">Add new
                                     Header</button>
                                 <div style="max-height: 300px;overflow: hidden auto;">
@@ -326,7 +342,7 @@ var autoResponderVue = new Vue({
                 this.errors.push("URL Pattern is required!");
             }
             
-            let m = ["HEAD", "GET","POST", "PUT", "DELETE"]
+            let m = ["HEAD", "GET","POST", "PUT", "DELETE", "TRACE"]
             if(m.indexOf(this.rule.method) == -1){
                 this.errors.push("Method is required!");
             }
