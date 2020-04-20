@@ -15,6 +15,13 @@ type Rule struct {
 func (r *Rule) Write(w http.ResponseWriter) {
 
 	for _, v := range r.Response.Headers {
+		if v.Key == "" || v.Value == "" {
+			continue
+		}
+
+		if v.Key == "Content-Length" {
+			continue
+		}
 		w.Header().Set(v.Key, v.Value)
 	}
 
