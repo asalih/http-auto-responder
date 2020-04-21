@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="en">
-
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -29,7 +28,6 @@
                 <strong>IMPORT Fiddler .saz File: </strong>
                     <input type="file" name="uploadFile" accept=".saz" style="width: 73%;margin-left: 2%;" />
                     <button type="submit" class="btn btn-primary">Send</button>
-                
             </form>
         </div>
         <div class="row">
@@ -37,13 +35,10 @@
                 <div class="jumbotron">
                     <div class="row">
                         <div class="col-md-6">
-                            <h2>Responses <small v-if="responses != undefined && responses.length > 0"
-                                    v-text="'('+responses.length+')'"></small></h2>
+                            <h2>Responses <small v-if="responses != undefined && responses.length > 0" v-text="'('+responses.length+')'"></small></h2>
                         </div>
-                        <div class="col-md-6"><button class="btn btn-primary btn-sm float-right" data-toggle="modal"
-                                data-target="#responseCreateModal">Add new Response</button></div>
+                        <div class="col-md-6"><button class="btn btn-primary btn-sm float-right" data-toggle="modal" data-target="#responseCreateModal">Add new Response</button></div>
                     </div>
-
                     <div v-if="responses == undefined || responses.length == 0">
                         <hr />
                         No response created yet!
@@ -90,8 +85,7 @@
                 <div class="jumbotron">
                     <div class="row">
                         <div class="col-md-6">
-                            <h2>Rules <small v-if="rules != undefined && rules.length > 0"
-                                    v-text="'('+rules.length+')'"></small></h2>
+                            <h2>Rules <small v-if="rules != undefined && rules.length > 0" v-text="'('+rules.length+')'"></small></h2>
                         </div>
                         <div class="col-md-6"><button class="btn btn-primary btn-sm float-right" data-toggle="modal"
                                 data-target="#ruleCreateModal">Add new Rule</button></div>
@@ -154,30 +148,21 @@
                             <li v-text="e"></li>
                         </ul>
                         <form id="rulesFrm" v-if="responses && responses.length > 0">
-                            <input type="hidden" class="form-control" id="RuleID" name="ID" value="" v-model="rule.id"
-                                required="">
+                            <input type="hidden" class="form-control" id="RuleID" name="ID" value="" v-model="rule.id">
                             <div class="form-group">
                                 <label>URL Pattern</label>
-                                <input type="text" class="form-control" v-model="rule.urlPattern" id="URLPattern"
-                                    name="URLPattern" placeholder="Put your URL pattern!" value="" required="">
+                                <input type="text" class="form-control" v-model="rule.urlPattern" id="URLPattern" name="URLPattern" placeholder="Put your URL pattern!">
                             </div>
                             <div class="form-group">
                                 <label>HTTP Method</label>
                                 <select class="form-control" name="Method" id="Method" v-model="rule.method">
-                                    <option value="GET">GET</option>
-                                    <option value="POST">POST</option>
-                                    <option value="PUT">PUT</option>
-                                    <option value="DELETE">DELETE</option>
-                                    <option value="HEAD">HEAD</option>
-                                    <option value="TRACE">TRACE</option>
+                                    <option v-for="t in m" v-bind:value="t" v-text="t"></option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>Select Response</label>
-                                <select class="form-control" name="ResponseID" id="ResponseID" required=""
-                                    v-model="rule.responseID">
-                                    <option v-for="response, index in responses" v-bind:value="response.id"
-                                        v-text="response.label"></option>
+                                <select class="form-control" name="ResponseID" id="ResponseID" v-model="rule.responseID">
+                                    <option v-for="response, index in responses" v-bind:value="response.id"v-text="response.label"></option>
                                 </select>
                             </div>
                         </form>
@@ -186,8 +171,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" v-if="responses && responses.length > 0"
-                            @click="saveRule">Save changes</button>
+                        <button type="button" class="btn btn-primary" v-if="responses && responses.length > 0" @click="saveRule">Save changes</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -211,13 +195,11 @@
                             <input type="hidden" class="form-control" id="ID" name="ID" value="" v-model="response.id">
                             <div class="form-group">
                                 <label>Label</label>
-                                <input type="text" class="form-control" v-model="response.label" id="Label" name="Label"
-                                    placeholder="Label" value="">
+                                <input type="text" class="form-control" v-model="response.label" id="Label" name="Label" placeholder="Label">
                             </div>
                             <div class="form-group">
                                 <label>Status Code</label>
-                                <input type="number" class="form-control" v-model.number="response.statusCode"
-                                    id="StatusCode" name="StatusCode" placeholder="Status Code">
+                                <input type="number" class="form-control" v-model.number="response.statusCode" id="StatusCode" name="StatusCode" placeholder="Status Code">
                             </div>
                             <div class="form-group">
                                 <label>HTTP Headers <span v-if="response.headers.length > 0" v-text="'('+response.headers.length+')'"></span></label><button type="button" @click="appendHeader"
@@ -226,12 +208,10 @@
                                 <div style="max-height: 300px;overflow: hidden auto;">
                                     <div class="row mt-3" v-for="header, index in response.headers">
                                         <div class="col-md-5">
-                                            <input type="text" class="form-control" v-model="header.key"
-                                                placeholder="Key" />
+                                            <input type="text" class="form-control" v-model="header.key" placeholder="Key" />
                                         </div>
                                         <div class="col-md-5">
-                                            <input type="text" class="form-control" v-model="header.value"
-                                                placeholder="Value" />
+                                            <input type="text" class="form-control" v-model="header.value" placeholder="Value" />
                                         </div>
                                         <div class="col-md-2">
                                             <a href="javascript:void(0)" @click="removeHeader"
@@ -252,25 +232,20 @@
                             </div>
                             <div class="form-group">
                                 <label>Body</label>
-                                <textarea class="form-control" name="ResponseBody" id="ResponseBody"
-                                    v-model="response.body"> </textarea>
+                                <textarea class="form-control" name="ResponseBody" id="ResponseBody" v-model="response.body"></textarea>
                             </div>
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" id="createResponse" @click="saveResponse">Save
-                            changes</button>
+                        <button type="button" class="btn btn-primary" id="createResponse" @click="saveResponse">Save changes</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
         </div>
-
         </div>
     </main>
 
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"
         integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
@@ -283,15 +258,13 @@
     <script type="text/javaScript">
 
 $(function () {
-    
-
-
 var defaultRule = function(){return {}}
 var defaultResponse = function(){return {statusCode:200, headers:[{key: "", value:""}]}}
 
 var autoResponderVue = new Vue({
     el: "#autoResponderVue",
     data: {
+        m: ["HEAD", "GET","POST", "PUT", "DELETE", "TRACE"],
         rules: [],
         responses: [],
         rule:defaultRule(),
@@ -340,8 +313,7 @@ var autoResponderVue = new Vue({
                 this.errors.push("URL Pattern is required!");
             }
             
-            let m = ["HEAD", "GET","POST", "PUT", "DELETE", "TRACE"]
-            if(m.indexOf(this.rule.method) == -1){
+            if(this.m.indexOf(this.rule.method) == -1){
                 this.errors.push("Method is required!");
             }
 

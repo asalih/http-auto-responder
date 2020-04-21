@@ -19,6 +19,7 @@ func NewAutoResponderHTTPHandler(refAutoResponder responder.AutoResponder) *Auto
 	return &AutoResponderHTTPHandler{refAutoResponder}
 }
 
+//ServeHTTP HTTP Serve handler
 func (handler *AutoResponderHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	hfn := HTTPHandlerFuncs[r.URL.Path]
