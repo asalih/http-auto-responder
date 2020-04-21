@@ -1,7 +1,6 @@
 package web
 
 import (
-	"archive/zip"
 	"crypto/rand"
 	"fmt"
 	"io/ioutil"
@@ -9,9 +8,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
+	"github.com/asalih/http-auto-responder/parser"
 	"github.com/asalih/http-auto-responder/responder"
 )
 
@@ -37,8 +36,19 @@ func init() {
 
 		defer file.Close()
 
-		if fileHeader.Size > maxUploadSize || !strings.HasSuffix(fileHeader.Filename, ".saz") {
+		if fileHeader.Size > maxUploadSize {
 			http.Redirect(w, r, redirectURI+"?err=file_size", 302)
+			return
+		}
+
+		fileExt := ""
+
+		if strings.HasSuffix(fileHeader.Filename, ".saz") {
+			fileExt = ".saz"
+		} else if strings.HasSuffix(fileHeader.Filename, ".farx") {
+			fileExt = ".farx"
+		} else {
+			http.Redirect(w, r, redirectURI+"?err=file_type", 302)
 			return
 		}
 
@@ -49,13 +59,13 @@ func init() {
 		}
 
 		fileType := http.DetectContentType(fileBytes)
-		if fileType != "application/zip" {
+		if fileType != "application/zip" && fileType != "text/plain; charset=utf-8" {
 			http.Redirect(w, r, redirectURI+"?err=invalid_file_type", 302)
 			return
 		}
 
 		fileName := randToken(12)
-		newPath := filepath.Join(uploadPath, fileName+".saz")
+		savedFilePath := filepath.Join(uploadPath, fileName+fileExt)
 
 		_, ferr := os.Stat(uploadPath)
 
@@ -66,124 +76,36 @@ func init() {
 			}
 		}
 
-		newFile, err := os.Create(newPath)
+		sazFile, err := os.Create(savedFilePath)
 
 		if err != nil {
 			http.Redirect(w, r, redirectURI+"?err=cant_save", 302)
 			return
 		}
 
-		if _, err := newFile.Write(fileBytes); err != nil {
+		if _, err := sazFile.Write(fileBytes); err != nil {
 			http.Redirect(w, r, redirectURI+"?err=cant_write", 302)
 			return
 		}
 
-		newFile.Close()
+		sazFile.Close()
 
-		zf, err := zip.OpenReader(newPath)
+		var parseErr error
+		if fileExt == ".saz" {
+			sazParser := &parser.SazParser{SazFilePath: savedFilePath, AutoResponder: ar, OrigFileName: fileHeader.Filename, UploadPath: uploadPath, SazFileName: fileName}
+			parseErr = sazParser.Handle()
+		} else if fileExt == ".farx" {
+			farxParser := &parser.FarxParser{FarxFilePath: savedFilePath}
+			parseErr = farxParser.Handle()
+		}
 
-		if err != nil {
-			http.Redirect(w, r, redirectURI+"?err=saved_zip_read", 302)
+		if parseErr != nil {
+			http.Redirect(w, r, redirectURI+"?err=cant_parse_file", 302)
 			return
 		}
 
-		sazFolderName := uploadPath + "/" + fileName
-		for _, file := range zf.File {
-			readZipFile(file, sazFolderName)
-		}
-
-		zf.Close()
-
-		parseAllFilesAndSave(sazFolderName, fileHeader.Filename, ar)
-
-		defer os.RemoveAll(sazFolderName + ".saz")
-		defer os.RemoveAll(sazFolderName)
-
 		http.Redirect(w, r, redirectURI+"?success=1", 302)
 	}
-}
-
-func readZipFile(file *zip.File, folderPath string) {
-	fc, err := file.Open()
-	if err != nil {
-		panic(err)
-	}
-	defer fc.Close()
-
-	_, ferr := os.Stat(folderPath)
-
-	if os.IsNotExist(ferr) {
-		errDir := os.MkdirAll(folderPath, 0755)
-		if errDir != nil {
-			log.Fatal(err)
-		}
-	}
-
-	newFile, ferr := os.Create(folderPath + "/" + strings.ReplaceAll(file.Name, "raw/", ""))
-	defer newFile.Close()
-
-	content, err := ioutil.ReadAll(fc)
-	if err != nil {
-		panic(err)
-	}
-
-	newFile.Write(content)
-}
-
-func parseAllFilesAndSave(folderPath string, orgFileName string, ar responder.AutoResponder) {
-	i := 1
-	for {
-		fileC, err := ioutil.ReadFile(folderPath + "/" + strconv.Itoa(i) + "_c.txt")
-		if err != nil {
-			break
-		}
-		fileS, _ := ioutil.ReadFile(folderPath + "/" + strconv.Itoa(i) + "_s.txt")
-
-		response := parseResponse(string(fileS))
-		response.Label = orgFileName + "_" + strconv.Itoa(i)
-
-		ar.AddOrUpdateResponse(response)
-
-		rule := parseRule(string(fileC))
-		rule.ResponseID = response.ID
-
-		ar.AddOrUpdateRule(rule)
-
-		i++
-	}
-}
-
-func parseRule(content string) *responder.Rule {
-	firstLine := strings.Split(strings.Split(content, "\n")[0], " ")
-
-	return &responder.Rule{IsActive: true, URLPattern: firstLine[1], Method: firstLine[0]}
-}
-
-func parseResponse(content string) *responder.Response {
-	lines := strings.Split(content, "\n")
-
-	status, _ := strconv.Atoi(strings.Split(lines[0], " ")[1])
-	var headers []*responder.Headers
-	body := ""
-
-	bodyStart := false
-	for i := 1; i < len(lines); i++ {
-		l := lines[i]
-		if !bodyStart {
-			if len(l) == 1 {
-				bodyStart = true
-				continue
-			}
-			idx := strings.Index(l, ":")
-			rs := []rune(l)
-
-			headers = append(headers, &responder.Headers{Key: string(rs[0:idx]), Value: strings.Trim(string(rs[idx+1:]), " ")})
-		} else {
-			body += l
-		}
-	}
-
-	return &responder.Response{Headers: headers, Body: body, StatusCode: status}
 }
 
 func randToken(len int) string {
