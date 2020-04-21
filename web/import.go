@@ -19,7 +19,7 @@ const maxUploadSize = 25 * 1024 * 1024 // 25 MB
 const uploadPath = "./tmp"
 
 func init() {
-	HTTPHandlerFuncs["/http-auto-responder/import"] = func(w http.ResponseWriter, r *http.Request, ar *responder.AutoResponder) {
+	HTTPHandlerFuncs["/http-auto-responder/import"] = func(w http.ResponseWriter, r *http.Request, ar responder.AutoResponder) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 		redirectURI := "/http-auto-responder"
@@ -130,7 +130,7 @@ func readZipFile(file *zip.File, folderPath string) {
 	newFile.Write(content)
 }
 
-func parseAllFilesAndSave(folderPath string, orgFileName string, ar *responder.AutoResponder) {
+func parseAllFilesAndSave(folderPath string, orgFileName string, ar responder.AutoResponder) {
 	i := 1
 	for {
 		fileC, err := ioutil.ReadFile(folderPath + "/" + strconv.Itoa(i) + "_c.txt")

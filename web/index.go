@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	HTTPHandlerFuncs["/http-auto-responder"] = func(w http.ResponseWriter, r *http.Request, ar *responder.AutoResponder) {
+	HTTPHandlerFuncs["/http-auto-responder"] = func(w http.ResponseWriter, r *http.Request, ar responder.AutoResponder) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 		t, err := template.ParseFiles("index.html")

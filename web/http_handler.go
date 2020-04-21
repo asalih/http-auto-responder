@@ -7,15 +7,15 @@ import (
 )
 
 //HTTPHandlerFuncs global variable for http handlers
-var HTTPHandlerFuncs map[string]func(http.ResponseWriter, *http.Request, *responder.AutoResponder) = make(map[string]func(http.ResponseWriter, *http.Request, *responder.AutoResponder))
+var HTTPHandlerFuncs map[string]func(http.ResponseWriter, *http.Request, responder.AutoResponder) = make(map[string]func(http.ResponseWriter, *http.Request, responder.AutoResponder))
 
 //AutoResponderHTTPHandler handler for global http requests
 type AutoResponderHTTPHandler struct {
-	AutoResponder *responder.AutoResponder
+	AutoResponder responder.AutoResponder
 }
 
 //NewAutoResponderHTTPHandler Creates an http wrapper for AutoResponder
-func NewAutoResponderHTTPHandler(refAutoResponder *responder.AutoResponder) *AutoResponderHTTPHandler {
+func NewAutoResponderHTTPHandler(refAutoResponder responder.AutoResponder) *AutoResponderHTTPHandler {
 	return &AutoResponderHTTPHandler{refAutoResponder}
 }
 

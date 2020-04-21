@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -13,7 +14,12 @@ func main() {
 
 	config.InitConfig()
 
-	autoResponder := responder.NewAutoResponder("./"+config.Configuration.DatabaseName, config.Configuration.Port)
+	autoResponder := responder.NewAutoResponder(&config.Configuration)
 
-	http.ListenAndServe(":"+strconv.Itoa(autoResponder.ListeningPort), web.NewAutoResponderHTTPHandler(autoResponder))
+	if autoResponder == nil {
+		fmt.Println("No Auto Responder provided. Provide DB Name or Folder path for auto responder data handling!")
+		return
+	}
+
+	http.ListenAndServe(":"+strconv.Itoa(config.Configuration.Port), web.NewAutoResponderHTTPHandler(autoResponder))
 }

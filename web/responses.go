@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	HTTPHandlerFuncs["/http-auto-responder/save-response"] = func(w http.ResponseWriter, r *http.Request, ar *responder.AutoResponder) {
+	HTTPHandlerFuncs["/http-auto-responder/save-response"] = func(w http.ResponseWriter, r *http.Request, ar responder.AutoResponder) {
 		w.Header().Set("Content-Type", "application/json")
 
 		decoder := json.NewDecoder(r.Body)
@@ -24,7 +24,7 @@ func init() {
 		w.Write([]byte(`{"status": "OK"}`))
 	}
 
-	HTTPHandlerFuncs["/http-auto-responder/get-responses"] = func(w http.ResponseWriter, r *http.Request, ar *responder.AutoResponder) {
+	HTTPHandlerFuncs["/http-auto-responder/get-responses"] = func(w http.ResponseWriter, r *http.Request, ar responder.AutoResponder) {
 		w.Header().Set("Content-Type", "application/json")
 
 		responses := ar.GetResponses()
@@ -33,7 +33,7 @@ func init() {
 		encoder.Encode(responses)
 	}
 
-	HTTPHandlerFuncs["/http-auto-responder/get-response"] = func(w http.ResponseWriter, r *http.Request, ar *responder.AutoResponder) {
+	HTTPHandlerFuncs["/http-auto-responder/get-response"] = func(w http.ResponseWriter, r *http.Request, ar responder.AutoResponder) {
 		w.Header().Set("Content-Type", "application/json")
 
 		idq := r.URL.Query().Get("id")
@@ -50,7 +50,7 @@ func init() {
 		encoder.Encode(response)
 	}
 
-	HTTPHandlerFuncs["/http-auto-responder/remove-response"] = func(w http.ResponseWriter, r *http.Request, ar *responder.AutoResponder) {
+	HTTPHandlerFuncs["/http-auto-responder/remove-response"] = func(w http.ResponseWriter, r *http.Request, ar responder.AutoResponder) {
 		w.Header().Set("Content-Type", "application/json")
 
 		idq := r.URL.Query().Get("id")

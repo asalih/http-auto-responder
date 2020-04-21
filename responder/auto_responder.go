@@ -1,263 +1,41 @@
 package responder
 
-import (
-	"encoding/binary"
-	"encoding/json"
-	"log"
-	"strings"
+import config "github.com/asalih/http-auto-responder/c"
 
-	bolt "github.com/etcd-io/bbolt"
-	"github.com/minio/minio/pkg/wildcard"
-)
-
-var ruleBucketName []byte = []byte("rules")
-var responseBucketName []byte = []byte("responses")
-
-//AutoResponder ...
-type AutoResponder struct {
-	DBPath        string
-	ListeningPort int
-	db            *bolt.DB
+//AutoResponder implements an interface for autoresponder
+type AutoResponder interface {
+	//Init auto responder
+	Init(conf *config.Config)
+	//AddOrUpdateRule adds or updates given rule
+	AddOrUpdateRule(rule *Rule)
+	//FindMatchingRule gets the rule with given url pattern and http method
+	FindMatchingRule(urlPattern string, method string) *Rule
+	//GetRule gets the rule with given id
+	GetRule(id uint64) *Rule
+	//GetRules gets the rules with given url pattern and http method
+	GetRules() []*Rule
+	//RemoveRule removes the rule
+	RemoveRule(id uint64)
+	//AddOrUpdateResponse adds or updates given rule
+	AddOrUpdateResponse(response *Response)
+	//GetResponse gets the response with given id
+	GetResponse(id uint64) *Response
+	//GetResponses gets the response slice
+	GetResponses() []*Response
+	//RemoveResponse removes the response with given id
+	RemoveResponse(id uint64)
 }
 
 //NewAutoResponder Inits an Auto Responder
-func NewAutoResponder(dbPath string, listeningPort int) *AutoResponder {
-	autoResponder := &AutoResponder{dbPath, listeningPort, nil}
+func NewAutoResponder(conf *config.Config) AutoResponder {
+	if conf.DatabaseName != "" {
+		dbResponder := NewDBAutoResponder(conf)
+		dbResponder.Init(conf)
 
-	autoResponder.init()
-	return autoResponder
-}
-
-func (ar *AutoResponder) init() {
-	db, err := bolt.Open(ar.DBPath, 0600, nil)
-	if err != nil {
-		log.Fatal(err)
+		return &dbResponder
+	} else if conf.FolderPath != "" {
+		//fs_auto_responder
 	}
 
-	ar.db = db
-}
-
-//AddOrUpdateRule adds or updates given rule
-func (ar *AutoResponder) AddOrUpdateRule(rule *Rule) {
-	ar.db.Update(func(tx *bolt.Tx) error {
-		tx.CreateBucketIfNotExists(ruleBucketName)
-		b := tx.Bucket(ruleBucketName)
-
-		if rule.ID == 0 {
-			id, _ := b.NextSequence()
-			rule.ID = id
-		}
-
-		buf, err := json.Marshal(rule)
-		if err != nil {
-			return err
-		}
-
-		return b.Put(itob(rule.ID), buf)
-	})
-}
-
-//FindMatchingRule gets the rule with given url pattern and http method
-func (ar *AutoResponder) FindMatchingRule(urlPattern string, method string) *Rule {
-	var extractedRule *Rule
-	ar.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket(ruleBucketName)
-
-		if b == nil {
-			return nil
-		}
-
-		c := b.Cursor()
-
-		if c == nil {
-			return nil
-		}
-
-		for k, v := c.First(); k != nil; k, v = c.Next() {
-			var rule Rule
-			err := json.Unmarshal(v, &rule)
-
-			if err != nil {
-				continue
-			}
-
-			if !rule.IsActive {
-				continue
-			}
-
-			if (!strings.Contains(urlPattern, rule.URLPattern) &&
-				!wildcard.Match(rule.URLPattern, urlPattern)) ||
-				!wildcard.Match(rule.Method, method) {
-				continue
-			}
-
-			rule.Response = ar.GetResponse(rule.ResponseID)
-
-			extractedRule = &rule
-			return nil
-		}
-
-		return nil
-	})
-
-	return extractedRule
-}
-
-//GetRule gets the rule with given id
-func (ar *AutoResponder) GetRule(id uint64) *Rule {
-	var rule Rule
-	ar.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket(ruleBucketName)
-		if b == nil {
-			return nil
-		}
-
-		v := b.Get(itob(id))
-
-		err := json.Unmarshal(v, &rule)
-
-		if err != nil {
-			return err
-		}
-
-		return nil
-	})
-
-	return &rule
-}
-
-//GetRules gets the rules with given url pattern and http method
-func (ar *AutoResponder) GetRules() []*Rule {
-	var rules []*Rule
-	ar.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket(ruleBucketName)
-		if b == nil {
-			return nil
-		}
-
-		c := b.Cursor()
-		if c == nil {
-			return nil
-		}
-
-		for k, v := c.First(); k != nil; k, v = c.Next() {
-
-			var rule Rule
-			err := json.Unmarshal(v, &rule)
-			if err != nil {
-				continue
-			}
-			rules = append(rules, &rule)
-		}
-
-		return nil
-	})
-
-	return rules
-}
-
-//RemoveRule removes the rule
-func (ar *AutoResponder) RemoveRule(id uint64) {
-	ar.db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket(ruleBucketName)
-
-		if b == nil {
-			return nil
-		}
-
-		return b.Delete(itob(id))
-	})
-}
-
-//AddOrUpdateResponse adds or updates given rule
-func (ar *AutoResponder) AddOrUpdateResponse(response *Response) {
-	ar.db.Update(func(tx *bolt.Tx) error {
-		tx.CreateBucketIfNotExists(responseBucketName)
-		b := tx.Bucket(responseBucketName)
-
-		if response.ID == 0 {
-			id, _ := b.NextSequence()
-			response.ID = id
-		}
-
-		buf, err := json.Marshal(response)
-		if err != nil {
-			return err
-		}
-
-		return b.Put(itob(response.ID), buf)
-	})
-}
-
-//GetResponse gets the response with given id
-func (ar *AutoResponder) GetResponse(id uint64) *Response {
-	var response Response
-	ar.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket(responseBucketName)
-		if b == nil {
-			return nil
-		}
-
-		v := b.Get(itob(id))
-
-		err := json.Unmarshal(v, &response)
-
-		if err != nil {
-			return err
-		}
-
-		return nil
-	})
-
-	return &response
-}
-
-//GetResponses gets the response slice
-func (ar *AutoResponder) GetResponses() []*Response {
-	var responses []*Response
-	ar.db.View(func(tx *bolt.Tx) error {
-
-		b := tx.Bucket(responseBucketName)
-		if b == nil {
-			return nil
-		}
-
-		c := b.Cursor()
-		if c == nil {
-			return nil
-		}
-
-		for k, v := c.First(); k != nil; k, v = c.Next() {
-
-			var response Response
-			err := json.Unmarshal(v, &response)
-
-			if err != nil {
-				continue
-			}
-			responses = append(responses, &response)
-		}
-
-		return nil
-	})
-
-	return responses
-}
-
-//RemoveResponse removes the response with given id
-func (ar *AutoResponder) RemoveResponse(id uint64) {
-	ar.db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket(responseBucketName)
-		if b == nil {
-			return nil
-		}
-
-		return b.Delete(itob(id))
-	})
-}
-
-func itob(v uint64) []byte {
-	b := make([]byte, 8)
-	binary.BigEndian.PutUint64(b, uint64(v))
-	return b
+	return nil
 }
