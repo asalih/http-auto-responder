@@ -7,9 +7,9 @@ import (
 
 //Config Application settings
 type Config struct {
-	DatabaseName string `json:"databaseName"`
-	FolderPath   string `json:"folderPath"`
-	Port         int    `json:"port"`
+	DatabaseName    string `json:"databaseName"`
+	JSONsFolderPath string `json:"jsonsFolderPath"`
+	Port            int    `json:"port"`
 }
 
 //Configuration ...

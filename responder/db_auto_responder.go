@@ -18,15 +18,16 @@ var responseBucketName []byte = []byte("responses")
 type DBAutoResponder struct {
 	DBPath string
 	db     *bolt.DB
+	conf   *config.Config
 }
 
 //NewDBAutoResponder Inits a DB Auto Responder
 func NewDBAutoResponder(conf *config.Config) DBAutoResponder {
-	return DBAutoResponder{"./" + conf.DatabaseName, nil}
+	return DBAutoResponder{"./" + conf.DatabaseName, nil, conf}
 }
 
 //Init auto responder
-func (ar *DBAutoResponder) Init(conf *config.Config) {
+func (ar *DBAutoResponder) Init() {
 	db, err := bolt.Open(ar.DBPath, 0600, nil)
 	if err != nil {
 		log.Fatal(err)

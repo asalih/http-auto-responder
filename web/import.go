@@ -95,7 +95,7 @@ func init() {
 			sazParser := &parser.SazParser{SazFilePath: savedFilePath, AutoResponder: ar, OrigFileName: fileHeader.Filename, UploadPath: uploadPath, SazFileName: fileName}
 			parseErr = sazParser.Handle()
 		} else if fileExt == ".farx" {
-			farxParser := &parser.FarxParser{FarxFilePath: savedFilePath}
+			farxParser := &parser.FarxParser{FarxFilePath: savedFilePath, AutoResponder: ar, OrigFileName: fileHeader.Filename, UploadPath: uploadPath, FarxFileName: fileName}
 			parseErr = farxParser.Handle()
 		}
 

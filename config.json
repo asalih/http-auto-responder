@@ -1,5 +1,5 @@
 {
-    "databaseName": "ar.db",
-    "folderPath": "",
+    "databaseName": "",
+    "jsonsFolderPath": "./json",
     "port": 80
 }

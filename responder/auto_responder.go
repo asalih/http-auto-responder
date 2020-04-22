@@ -5,7 +5,7 @@ import config "github.com/asalih/http-auto-responder/c"
 //AutoResponder implements an interface for autoresponder
 type AutoResponder interface {
 	//Init auto responder
-	Init(conf *config.Config)
+	Init()
 	//AddOrUpdateRule adds or updates given rule
 	AddOrUpdateRule(rule *Rule)
 	//FindMatchingRule gets the rule with given url pattern and http method
@@ -30,11 +30,14 @@ type AutoResponder interface {
 func NewAutoResponder(conf *config.Config) AutoResponder {
 	if conf.DatabaseName != "" {
 		dbResponder := NewDBAutoResponder(conf)
-		dbResponder.Init(conf)
+		dbResponder.Init()
 
 		return &dbResponder
-	} else if conf.FolderPath != "" {
-		//fs_auto_responder
+	} else if conf.JSONsFolderPath != "" {
+		jsonResponder := NewJSONAutoResponder(conf)
+		jsonResponder.Init()
+
+		return &jsonResponder
 	}
 
 	return nil
