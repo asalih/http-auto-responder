@@ -37,9 +37,6 @@ func (parser *SazParser) Handle() error {
 
 	parser.parseAllFilesAndSave(sazFolderName, parser.OrigFileName)
 
-	defer os.RemoveAll(sazFolderName + ".saz")
-	defer os.RemoveAll(sazFolderName)
-
 	return nil
 }
 
@@ -96,7 +93,7 @@ func (parser *SazParser) parseAllFilesAndSave(folderPath string, orgFileName str
 func (parser *SazParser) parseRule(content string) *responder.Rule {
 	firstLine := strings.Split(strings.Split(content, "\n")[0], " ")
 
-	return &responder.Rule{IsActive: true, URLPattern: firstLine[1], Method: firstLine[0]}
+	return &responder.Rule{IsActive: true, URLPattern: firstLine[1], Method: firstLine[0], MatchType: "CONTAINS"}
 }
 
 func (parser *SazParser) parseResponse(content string) *responder.Response {
@@ -115,9 +112,12 @@ func (parser *SazParser) parseResponse(content string) *responder.Response {
 				continue
 			}
 			idx := strings.Index(l, ":")
-			rs := []rune(l)
 
-			headers = append(headers, &responder.Headers{Key: string(rs[0:idx]), Value: strings.Trim(string(rs[idx+1:]), " ")})
+			if idx > -1 {
+				rs := []rune(l)
+
+				headers = append(headers, &responder.Headers{Key: string(rs[0:idx]), Value: strings.Trim(string(rs[idx+1:]), " ")})
+			}
 		} else {
 			body += l
 		}

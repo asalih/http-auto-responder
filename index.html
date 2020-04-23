@@ -25,8 +25,8 @@
         <hr>
         <div class="alert alert-primary">
             <form action="/http-auto-responder/import" method="POST" enctype="multipart/form-data">
-                <strong>IMPORT Fiddler .saz File: </strong>
-                    <input type="file" name="uploadFile" accept=".saz,.farx" style="width: 73%;margin-left: 2%;" />
+                <strong>IMPORT Fiddler .saz, .farx File: </strong>
+                    <input type="file" name="uploadFile" accept=".saz,.farx" style="width: 72%;" />
                     <button type="submit" class="btn btn-primary">Send</button>
             </form>
         </div>
@@ -148,21 +148,28 @@
                             <li v-text="e"></li>
                         </ul>
                         <form id="rulesFrm" v-if="responses && responses.length > 0">
-                            <input type="hidden" class="form-control" id="RuleID" name="ID" value="" v-model="rule.id">
+                            <input type="hidden" class="form-control" id="RuleID" value="" v-model="rule.id">
                             <div class="form-group">
-                                <label>URL Pattern</label>
-                                <input type="text" class="form-control" v-model="rule.urlPattern" id="URLPattern" name="URLPattern" placeholder="Put your URL pattern!">
+                                <div class="row">
+                                <div class="col-md-3">
+                                    <label>Match Type</label>
+                                    <select class="form-control" id="matchType" v-model="rule.matchType">
+                                        <option v-for="mstr, index in mt" v-bind:value="mstr" v-text="mstr"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-9"><label>URL Pattern</label>
+                                <input type="text" class="form-control" v-model="rule.urlPattern" id="URLPattern" placeholder="Put your URL pattern!">
+                                </div>
                             </div>
+                        </div>
                             <div class="form-group">
                                 <label>HTTP Method</label>
-                                <select class="form-control" name="Method" id="Method" v-model="rule.method">
-                                    <option v-for="t in m" v-bind:value="t" v-text="t"></option>
-                                </select>
+                                <input type="text" class="form-control" v-model="rule.method" id="Method" placeholder="Example: GET|POST">
                             </div>
                             <div class="form-group">
                                 <label>Select Response</label>
-                                <select class="form-control" name="ResponseID" id="ResponseID" v-model="rule.responseID">
-                                    <option v-for="response, index in responses" v-bind:value="response.id"v-text="response.label"></option>
+                                <select class="form-control"id="ResponseID" v-model="rule.responseID">
+                                    <option v-for="response, index in responses" v-bind:value="response.id" v-text="response.label"></option>
                                 </select>
                             </div>
                         </form>
@@ -258,13 +265,13 @@
     <script type="text/javaScript">
 
 $(function () {
-var defaultRule = function(){return {}}
+var defaultRule = function(){return {matchType:"CONTAINS"}}
 var defaultResponse = function(){return {statusCode:200, headers:[{key: "", value:""}]}}
 
 var autoResponderVue = new Vue({
     el: "#autoResponderVue",
     data: {
-        m: ["HEAD", "GET","POST", "PUT", "DELETE", "TRACE"],
+        mt: ["CONTAINS", "WILDCARD", "EXACT", "NOT", "REGEX"],
         rules: [],
         responses: [],
         rule:defaultRule(),
@@ -313,7 +320,7 @@ var autoResponderVue = new Vue({
                 this.errors.push("URL Pattern is required!");
             }
             
-            if(this.m.indexOf(this.rule.method) == -1){
+            if(this.rule.method == null ||this.rule.method == ""){
                 this.errors.push("Method is required!");
             }
 

@@ -8,11 +8,12 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
-	config "github.com/asalih/http-auto-responder/c"
+	"github.com/asalih/http-auto-responder/utils"
 	"github.com/minio/minio/pkg/wildcard"
 )
 
@@ -24,7 +25,6 @@ type JSONAutoResponder struct {
 	FolderPath string
 	Rules      map[uint64]*ruleFile
 	Responses  map[uint64]*responseFile
-	conf       *config.Config
 }
 
 type ruleFile struct {
@@ -38,16 +38,16 @@ type responseFile struct {
 }
 
 //NewJSONAutoResponder Inits a DB Auto Responder
-func NewJSONAutoResponder(conf *config.Config) JSONAutoResponder {
-	return JSONAutoResponder{"./" + conf.JSONsFolderPath, make(map[uint64]*ruleFile), make(map[uint64]*responseFile), conf}
+func NewJSONAutoResponder() JSONAutoResponder {
+	return JSONAutoResponder{"./" + utils.Configuration.JSONsFolderPath, make(map[uint64]*ruleFile), make(map[uint64]*responseFile)}
 }
 
 //Init auto responder
 func (ar *JSONAutoResponder) Init() {
-	stat, err := os.Stat(ar.conf.JSONsFolderPath)
+	stat, err := os.Stat(utils.Configuration.JSONsFolderPath)
 
 	if os.IsNotExist(err) {
-		errDir := os.MkdirAll(ar.conf.JSONsFolderPath, 0755)
+		errDir := os.MkdirAll(utils.Configuration.JSONsFolderPath, 0755)
 		if errDir != nil {
 			log.Fatal(err)
 		}
@@ -62,13 +62,13 @@ func (ar *JSONAutoResponder) Init() {
 		fmt.Println("Need a directory!")
 	}
 
-	_, serr := ioutil.ReadDir(ar.conf.JSONsFolderPath)
+	_, serr := ioutil.ReadDir(utils.Configuration.JSONsFolderPath)
 
 	if serr != nil {
 		fmt.Println("Can't itarate the given directory")
 	}
 
-	ferr := filepath.Walk(ar.conf.JSONsFolderPath,
+	ferr := filepath.Walk(utils.Configuration.JSONsFolderPath,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
@@ -132,14 +132,22 @@ func (ar *JSONAutoResponder) AddOrUpdateRule(rule *Rule) {
 func (ar *JSONAutoResponder) FindMatchingRule(urlPattern string, method string) *Rule {
 	for _, rf := range ar.Rules {
 
-		if !rf.rule.IsActive {
+		if !rf.rule.IsActive || !wildcard.Match(rf.rule.Method, method) {
 			continue
 		}
 
-		if (!strings.Contains(urlPattern, rf.rule.URLPattern) &&
-			!wildcard.Match(rf.rule.URLPattern, urlPattern)) ||
-			!wildcard.Match(rf.rule.Method, method) {
+		mType := utils.GetMatchType(rf.rule.MatchType)
+		if (mType == utils.EXACT && urlPattern != strings.ToLower(rf.rule.URLPattern)) ||
+			(mType == utils.WILDCARD && !wildcard.Match(rf.rule.URLPattern, urlPattern)) ||
+			(mType == utils.CONTAINS && !strings.Contains(urlPattern, rf.rule.URLPattern)) ||
+			(mType == utils.NOT && strings.Contains(urlPattern, rf.rule.URLPattern)) {
 			continue
+		} else if mType == utils.REGEX {
+			m, err := regexp.MatchString(rf.rule.URLPattern, urlPattern)
+
+			if !m || err != nil {
+				continue
+			}
 		}
 
 		rf.rule.Response = ar.GetResponse(rf.rule.ResponseID)

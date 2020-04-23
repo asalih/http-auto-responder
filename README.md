@@ -4,7 +4,7 @@ Useful tool for static responses. It's like Fiddler's AutoResponder.
 
 ## Features
 
--   Wildcard Rule definition
+-   Rule definitions with matching methods.
 -   Simple UI to manage Rules and Responses
 -   Farx & Saz import
 -   JSON files or boltdb for rules and responses storage
@@ -18,6 +18,6 @@ Then edit config.json
 
 ## ToDo
 
--   Farx import (inprogress)
+-   Farx Auto Responder, handle file responses (inprogress)
 -   Use templating and project a model to response
 -   How can we use SSL? or should we?

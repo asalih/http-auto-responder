@@ -1,4 +1,4 @@
-package config
+package utils
 
 import (
 	"encoding/json"
@@ -7,9 +7,10 @@ import (
 
 //Config Application settings
 type Config struct {
-	DatabaseName    string `json:"databaseName"`
-	JSONsFolderPath string `json:"jsonsFolderPath"`
-	Port            int    `json:"port"`
+	DatabaseName        string `json:"databaseName"`
+	JSONsFolderPath     string `json:"jsonsFolderPath"`
+	FarxFilesFolderPath string `json:"farxFilesFolderPath"`
+	Port                int    `json:"port"`
 }
 
 //Configuration ...

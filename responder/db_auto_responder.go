@@ -4,9 +4,10 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"log"
+	"regexp"
 	"strings"
 
-	config "github.com/asalih/http-auto-responder/c"
+	"github.com/asalih/http-auto-responder/utils"
 	bolt "github.com/etcd-io/bbolt"
 	"github.com/minio/minio/pkg/wildcard"
 )
@@ -18,12 +19,11 @@ var responseBucketName []byte = []byte("responses")
 type DBAutoResponder struct {
 	DBPath string
 	db     *bolt.DB
-	conf   *config.Config
 }
 
 //NewDBAutoResponder Inits a DB Auto Responder
-func NewDBAutoResponder(conf *config.Config) DBAutoResponder {
-	return DBAutoResponder{"./" + conf.DatabaseName, nil, conf}
+func NewDBAutoResponder() DBAutoResponder {
+	return DBAutoResponder{"./" + utils.Configuration.DatabaseName, nil}
 }
 
 //Init auto responder
@@ -80,14 +80,22 @@ func (ar *DBAutoResponder) FindMatchingRule(urlPattern string, method string) *R
 				continue
 			}
 
-			if !rule.IsActive {
+			if !rule.IsActive || !wildcard.Match(rule.Method, method) {
 				continue
 			}
 
-			if (!strings.Contains(urlPattern, rule.URLPattern) &&
-				!wildcard.Match(rule.URLPattern, urlPattern)) ||
-				!wildcard.Match(rule.Method, method) {
+			mType := utils.GetMatchType(rule.MatchType)
+			if (mType == utils.EXACT && urlPattern != strings.ToLower(rule.URLPattern)) ||
+				(mType == utils.WILDCARD && !wildcard.Match(rule.URLPattern, urlPattern)) ||
+				(mType == utils.CONTAINS && !strings.Contains(urlPattern, rule.URLPattern)) ||
+				(mType == utils.NOT && strings.Contains(urlPattern, rule.URLPattern)) {
 				continue
+			} else if mType == utils.REGEX {
+				m, err := regexp.MatchString(rule.URLPattern, urlPattern)
+
+				if !m || err != nil {
+					continue
+				}
 			}
 
 			rule.Response = ar.GetResponse(rule.ResponseID)

@@ -94,9 +94,14 @@ func init() {
 		if fileExt == ".saz" {
 			sazParser := &parser.SazParser{SazFilePath: savedFilePath, AutoResponder: ar, OrigFileName: fileHeader.Filename, UploadPath: uploadPath, SazFileName: fileName}
 			parseErr = sazParser.Handle()
+
+			defer os.RemoveAll(savedFilePath)
+			defer os.RemoveAll(uploadPath + "/" + fileName)
 		} else if fileExt == ".farx" {
-			farxParser := &parser.FarxParser{FarxFilePath: savedFilePath, AutoResponder: ar, OrigFileName: fileHeader.Filename, UploadPath: uploadPath, FarxFileName: fileName}
+			farxParser := &parser.FarxParser{FarxFilePath: savedFilePath, AutoResponder: ar, OrigFileName: fileHeader.Filename}
 			parseErr = farxParser.Handle()
+
+			defer os.RemoveAll(savedFilePath)
 		}
 
 		if parseErr != nil {

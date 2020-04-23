@@ -6,6 +6,7 @@ import "net/http"
 type Rule struct {
 	ID         uint64    `json:"id"`
 	URLPattern string    `json:"urlPattern"`
+	MatchType  string    `json:"matchType"`
 	Method     string    `json:"method"`
 	ResponseID uint64    `json:"responseID"`
 	IsActive   bool      `json:"isActive"`

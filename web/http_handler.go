@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/asalih/http-auto-responder/responder"
+	"github.com/asalih/http-auto-responder/utils"
 )
 
 //HTTPHandlerFuncs global variable for http handlers
@@ -25,6 +26,11 @@ func (handler *AutoResponderHTTPHandler) ServeHTTP(w http.ResponseWriter, r *htt
 	hfn := HTTPHandlerFuncs[r.URL.Path]
 
 	if hfn != nil {
+		if utils.Configuration.FarxFilesFolderPath != "" {
+			w.Write([]byte("FARX File System Auto Responder activated. NO UI management available for FARX files."))
+			return
+		}
+
 		hfn(w, r, handler.AutoResponder)
 		return
 	}

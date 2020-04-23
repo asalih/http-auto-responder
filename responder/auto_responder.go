@@ -1,6 +1,6 @@
 package responder
 
-import config "github.com/asalih/http-auto-responder/c"
+import "github.com/asalih/http-auto-responder/utils"
 
 //AutoResponder implements an interface for autoresponder
 type AutoResponder interface {
@@ -27,17 +27,22 @@ type AutoResponder interface {
 }
 
 //NewAutoResponder Inits an Auto Responder
-func NewAutoResponder(conf *config.Config) AutoResponder {
+func NewAutoResponder(conf *utils.Config) AutoResponder {
 	if conf.DatabaseName != "" {
-		dbResponder := NewDBAutoResponder(conf)
+		dbResponder := NewDBAutoResponder()
 		dbResponder.Init()
 
 		return &dbResponder
 	} else if conf.JSONsFolderPath != "" {
-		jsonResponder := NewJSONAutoResponder(conf)
+		jsonResponder := NewJSONAutoResponder()
 		jsonResponder.Init()
 
 		return &jsonResponder
+	} else if conf.FarxFilesFolderPath != "" {
+		farxResponder := NewFarxAutoResponder()
+		farxResponder.Init()
+
+		return &farxResponder
 	}
 
 	return nil
