@@ -15,16 +15,32 @@ Useful tool for static responses. It's like Fiddler's AutoResponder.
         FARX files can be served directly. If you specify a FARX containing dir in the config file, tool reads all FARX files recursively and serve it accordingly. No UI support if you are using FARX files.
     #### FARX files reloding
         There is a reload enpoint available for if you specify FARX dir. Example;
-        ```
         curl http://localhost/http-auto-responder/reload?path=farx_test.farx
-        ```
-
+        
 ## Installation
-
 ```
 go get -u github.com/asalih/http-auto-responder
 ```
 Then edit config.json
+
+## Example
+The tool provides minimum UI except if you want to use FARX files. After you get the source or get the release binaries then just edit the config file as you wish then you good to go!
+
+Config file needs a storage configuration and a port for to listening http requests.
+You can not use multiple storage option, please pick one according to your needs.
+-   databaseName: boltDB database name.
+-   jsonsFolderPath: rules and responses can be stored as json serialized if you specify the folder path.
+-   farxFilesFolderPath: farx files can be served directly if you specify the folder path.
+
+In this example below, FARX folder specified.
+```
+{
+    "databaseName": "",
+    "jsonsFolderPath": "",
+    "farxFilesFolderPath": "./farx",
+    "port": 80
+}
+```
 
 ## ToDo
 
