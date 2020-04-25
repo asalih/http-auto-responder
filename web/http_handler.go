@@ -2,6 +2,7 @@ package web
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/asalih/http-auto-responder/responder"
 	"github.com/asalih/http-auto-responder/utils"
@@ -23,10 +24,11 @@ func NewAutoResponderHTTPHandler(refAutoResponder responder.AutoResponder) *Auto
 //ServeHTTP HTTP Serve handler
 func (handler *AutoResponderHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	hfn := HTTPHandlerFuncs[r.URL.Path]
+	p := r.URL.Path
+	hfn := HTTPHandlerFuncs[p]
 
 	if hfn != nil {
-		if utils.Configuration.FarxFilesFolderPath != "" {
+		if utils.Configuration.FarxFilesFolderPath != "" && p != "/http-auto-responder/reload" {
 			w.Write([]byte("FARX File System Auto Responder activated. NO UI management available for FARX files."))
 			return
 		}
@@ -52,5 +54,9 @@ func (handler *AutoResponderHTTPHandler) ServeHTTP(w http.ResponseWriter, r *htt
 		return
 	}
 
-	rule.Write(w)
+	if rule.Latency > 0 {
+		time.Sleep(time.Millisecond * time.Duration(rule.Latency))
+	}
+
+	rule.Write(w, r)
 }

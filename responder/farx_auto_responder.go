@@ -16,12 +16,12 @@ import (
 //FarxAutoResponder File system json auto responder
 type FarxAutoResponder struct {
 	FolderPath string
-	Rules      []*Rule
+	Rules      []*ruleFile
 }
 
 //NewFarxAutoResponder Inits a DB Auto Responder
 func NewFarxAutoResponder() FarxAutoResponder {
-	return FarxAutoResponder{"./" + utils.Configuration.FarxFilesFolderPath, []*Rule{}}
+	return FarxAutoResponder{"./" + utils.Configuration.FarxFilesFolderPath, []*ruleFile{}}
 }
 
 //Init auto responder
@@ -57,30 +57,16 @@ func (ar *FarxAutoResponder) Init() {
 			}
 			n := info.Name()
 			if strings.HasSuffix(n, ".farx") {
+				rules, err := ar.loadFarxRule(path)
 
-				farx, err := ReadFarxFile(path)
 				if err != nil {
 					return err
 				}
 
-				for _, s := range farx.States {
-					if !s.Enabled {
-						continue
-					}
-
-					for _, r := range s.ResponseRules {
-						if r.Headers == "" {
-							continue
-						}
-
-						response := r.MapToResponse()
-
-						rule := r.MapToRule()
-						rule.Response = response
-
-						ar.Rules = append(ar.Rules, rule)
-					}
+				if rules != nil {
+					ar.Rules = append(ar.Rules, rules...)
 				}
+
 			}
 
 			return nil
@@ -98,27 +84,27 @@ func (ar *FarxAutoResponder) AddOrUpdateRule(rule *Rule) {
 
 //FindMatchingRule gets the rule with given url pattern and http method
 func (ar *FarxAutoResponder) FindMatchingRule(urlPattern string, method string) *Rule {
-	for _, rule := range ar.Rules {
+	for _, rf := range ar.Rules {
 
-		if !rule.IsActive || !wildcard.Match(rule.Method, method) {
+		if !rf.rule.IsActive || !wildcard.Match(rf.rule.Method, method) {
 			continue
 		}
 
-		mType := utils.GetMatchType(rule.MatchType)
-		if (mType == utils.EXACT && urlPattern != strings.ToLower(rule.URLPattern)) ||
-			(mType == utils.WILDCARD && !wildcard.Match(rule.URLPattern, urlPattern)) ||
-			(mType == utils.CONTAINS && !strings.Contains(urlPattern, rule.URLPattern)) ||
-			(mType == utils.NOT && strings.Contains(urlPattern, rule.URLPattern)) {
+		mType := utils.GetMatchType(rf.rule.MatchType)
+		if (mType == utils.EXACT && urlPattern != rf.rule.URLPattern) ||
+			(mType == utils.WILDCARD && !wildcard.Match(rf.rule.URLPattern, urlPattern)) ||
+			(mType == utils.CONTAINS && !strings.Contains(urlPattern, rf.rule.URLPattern)) ||
+			(mType == utils.NOT && strings.Contains(urlPattern, rf.rule.URLPattern)) {
 			continue
 		} else if mType == utils.REGEX {
-			m, err := regexp.MatchString(rule.URLPattern, urlPattern)
+			m, err := regexp.MatchString(rf.rule.URLPattern, urlPattern)
 
 			if !m || err != nil {
 				continue
 			}
 		}
 
-		return rule
+		return rf.rule
 	}
 
 	return nil
@@ -162,4 +148,57 @@ func (ar *FarxAutoResponder) GetResponses() []*Response {
 //RemoveResponse removes the response with given id
 func (ar *FarxAutoResponder) RemoveResponse(id uint64) {
 	//NOOP FARX Auto responder no ability to rule.
+}
+
+//Reload updates given farx
+func (ar *FarxAutoResponder) Reload(farxPath string) (bool, error) {
+	farxPath = strings.ReplaceAll(farxPath, "/", "\\")
+	xmlRule, err := ar.loadFarxRule(farxPath)
+
+	if xmlRule == nil || err != nil {
+		return false, err
+	}
+
+	newSlice := []*ruleFile{}
+	for _, rf := range ar.Rules {
+
+		if strings.Index(farxPath, rf.path) > -1 {
+			continue
+		}
+		newSlice = append(newSlice, rf)
+	}
+
+	ar.Rules = append(newSlice, xmlRule...)
+
+	return true, nil
+}
+
+//LoadFarxRule Loads a farx file and returns rules
+func (ar *FarxAutoResponder) loadFarxRule(farxPath string) ([]*ruleFile, error) {
+	farx, err := ReadFarxFile(farxPath)
+	if err != nil {
+		return nil, err
+	}
+
+	result := []*ruleFile{}
+	for _, s := range farx.States {
+		if !s.Enabled {
+			continue
+		}
+
+		for _, r := range s.ResponseRules {
+			if r.Headers == "" && r.Action == "" {
+				continue
+			}
+
+			response := r.MapToResponse()
+
+			rule := r.MapToRule()
+			rule.Response = response
+
+			result = append(result, &ruleFile{farxPath, rule})
+		}
+	}
+
+	return result, nil
 }

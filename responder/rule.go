@@ -1,6 +1,11 @@
 package responder
 
-import "net/http"
+import (
+	"net/http"
+	"text/template"
+
+	"github.com/asalih/http-auto-responder/utils"
+)
 
 //Rule ...
 type Rule struct {
@@ -9,11 +14,12 @@ type Rule struct {
 	MatchType  string    `json:"matchType"`
 	Method     string    `json:"method"`
 	ResponseID uint64    `json:"responseID"`
+	Latency    int       `json:"latency"`
 	IsActive   bool      `json:"isActive"`
 	Response   *Response `json:"-"`
 }
 
-func (r *Rule) Write(w http.ResponseWriter) {
+func (r *Rule) Write(w http.ResponseWriter, req *http.Request) {
 
 	for _, v := range r.Response.Headers {
 		if v.Key == "" || v.Value == "" {
@@ -27,5 +33,13 @@ func (r *Rule) Write(w http.ResponseWriter) {
 	}
 
 	w.WriteHeader(r.Response.StatusCode)
-	w.Write([]byte(r.Response.Body))
+
+	templ, err := template.New(r.URLPattern).Parse(r.Response.Body)
+	if err != nil {
+		w.Write([]byte("Err on templating"))
+	}
+
+	model := utils.MapToHTTPRequestModel(req)
+
+	templ.Execute(w, model)
 }

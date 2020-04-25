@@ -137,7 +137,7 @@ func (ar *JSONAutoResponder) FindMatchingRule(urlPattern string, method string) 
 		}
 
 		mType := utils.GetMatchType(rf.rule.MatchType)
-		if (mType == utils.EXACT && urlPattern != strings.ToLower(rf.rule.URLPattern)) ||
+		if (mType == utils.EXACT && urlPattern != rf.rule.URLPattern) ||
 			(mType == utils.WILDCARD && !wildcard.Match(rf.rule.URLPattern, urlPattern)) ||
 			(mType == utils.CONTAINS && !strings.Contains(urlPattern, rf.rule.URLPattern)) ||
 			(mType == utils.NOT && strings.Contains(urlPattern, rf.rule.URLPattern)) {

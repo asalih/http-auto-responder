@@ -76,7 +76,7 @@ func (parser *SazParser) parseAllFilesAndSave(folderPath string, orgFileName str
 		}
 		fileS, _ := ioutil.ReadFile(folderPath + "/" + strconv.Itoa(i) + "_s.txt")
 
-		response := parser.parseResponse(string(fileS))
+		response := ParseStringContent(string(fileS))
 		response.Label = orgFileName + "_" + strconv.Itoa(i)
 
 		parser.AutoResponder.AddOrUpdateResponse(response)
@@ -96,32 +96,7 @@ func (parser *SazParser) parseRule(content string) *responder.Rule {
 	return &responder.Rule{IsActive: true, URLPattern: firstLine[1], Method: firstLine[0], MatchType: "CONTAINS"}
 }
 
-func (parser *SazParser) parseResponse(content string) *responder.Response {
-	lines := strings.Split(content, "\n")
-
-	status, _ := strconv.Atoi(strings.Split(lines[0], " ")[1])
-	var headers []*responder.Headers
-	body := ""
-
-	bodyStart := false
-	for i := 1; i < len(lines); i++ {
-		l := lines[i]
-		if !bodyStart {
-			if len(l) == 1 {
-				bodyStart = true
-				continue
-			}
-			idx := strings.Index(l, ":")
-
-			if idx > -1 {
-				rs := []rune(l)
-
-				headers = append(headers, &responder.Headers{Key: string(rs[0:idx]), Value: strings.Trim(string(rs[idx+1:]), " ")})
-			}
-		} else {
-			body += l
-		}
-	}
-
-	return &responder.Response{Headers: headers, Body: body, StatusCode: status}
+//ParseStringContent parses given http content
+func ParseStringContent(content string) *responder.Response {
+	return responder.NewResponseFromString(content)
 }

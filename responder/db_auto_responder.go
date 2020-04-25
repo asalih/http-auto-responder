@@ -85,7 +85,7 @@ func (ar *DBAutoResponder) FindMatchingRule(urlPattern string, method string) *R
 			}
 
 			mType := utils.GetMatchType(rule.MatchType)
-			if (mType == utils.EXACT && urlPattern != strings.ToLower(rule.URLPattern)) ||
+			if (mType == utils.EXACT && urlPattern != rule.URLPattern) ||
 				(mType == utils.WILDCARD && !wildcard.Match(rule.URLPattern, urlPattern)) ||
 				(mType == utils.CONTAINS && !strings.Contains(urlPattern, rule.URLPattern)) ||
 				(mType == utils.NOT && strings.Contains(urlPattern, rule.URLPattern)) {
