@@ -8,8 +8,7 @@ import (
 	"strings"
 
 	"github.com/asalih/http-auto-responder/utils"
-	bolt "github.com/etcd-io/bbolt"
-	"github.com/minio/minio/pkg/wildcard"
+	bolt "go.etcd.io/bbolt"
 )
 
 var ruleBucketName []byte = []byte("rules")
@@ -80,13 +79,13 @@ func (ar *DBAutoResponder) FindMatchingRule(urlPattern string, method string) *R
 				continue
 			}
 
-			if !rule.IsActive || !wildcard.Match(rule.Method, method) {
+			if !rule.IsActive || !utils.WildcardMatch(rule.Method, method) {
 				continue
 			}
 
 			mType := utils.GetMatchType(rule.MatchType)
 			if (mType == utils.EXACT && urlPattern != rule.URLPattern) ||
-				(mType == utils.WILDCARD && !wildcard.Match(rule.URLPattern, urlPattern)) ||
+				(mType == utils.WILDCARD && !utils.WildcardMatch(rule.URLPattern, urlPattern)) ||
 				(mType == utils.CONTAINS && !strings.Contains(urlPattern, rule.URLPattern)) ||
 				(mType == utils.NOT && strings.Contains(urlPattern, rule.URLPattern)) {
 				continue

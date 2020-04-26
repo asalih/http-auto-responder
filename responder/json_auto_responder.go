@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/asalih/http-auto-responder/utils"
-	"github.com/minio/minio/pkg/wildcard"
 )
 
 var rulePrefix string = "rule"
@@ -132,13 +131,13 @@ func (ar *JSONAutoResponder) AddOrUpdateRule(rule *Rule) {
 func (ar *JSONAutoResponder) FindMatchingRule(urlPattern string, method string) *Rule {
 	for _, rf := range ar.Rules {
 
-		if !rf.rule.IsActive || !wildcard.Match(rf.rule.Method, method) {
+		if !rf.rule.IsActive || !utils.WildcardMatch(rf.rule.Method, method) {
 			continue
 		}
 
 		mType := utils.GetMatchType(rf.rule.MatchType)
 		if (mType == utils.EXACT && urlPattern != rf.rule.URLPattern) ||
-			(mType == utils.WILDCARD && !wildcard.Match(rf.rule.URLPattern, urlPattern)) ||
+			(mType == utils.WILDCARD && !utils.WildcardMatch(rf.rule.URLPattern, urlPattern)) ||
 			(mType == utils.CONTAINS && !strings.Contains(urlPattern, rf.rule.URLPattern)) ||
 			(mType == utils.NOT && strings.Contains(urlPattern, rf.rule.URLPattern)) {
 			continue
