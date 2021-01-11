@@ -2,6 +2,7 @@ package parser
 
 import (
 	"archive/zip"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -77,6 +78,7 @@ func (parser *SazParser) parseAllFilesAndSave(folderPath string, orgFileName str
 
 		fileC, err := ioutil.ReadFile(folderPath + "/" + is + "_c.txt")
 		if err != nil {
+			fmt.Println(err)
 			break
 		}
 		fileS, _ := ioutil.ReadFile(folderPath + "/" + is + "_s.txt")
