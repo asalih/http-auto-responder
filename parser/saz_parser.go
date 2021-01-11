@@ -70,14 +70,19 @@ func (parser *SazParser) readZipFile(file *zip.File, folderPath string) {
 func (parser *SazParser) parseAllFilesAndSave(folderPath string, orgFileName string) {
 	i := 1
 	for {
-		fileC, err := ioutil.ReadFile(folderPath + "/" + strconv.Itoa(i) + "_c.txt")
+		is := strconv.Itoa(i)
+		if len(is) < 2 {
+			is = "0" + is
+		}
+
+		fileC, err := ioutil.ReadFile(folderPath + "/" + is + "_c.txt")
 		if err != nil {
 			break
 		}
-		fileS, _ := ioutil.ReadFile(folderPath + "/" + strconv.Itoa(i) + "_s.txt")
+		fileS, _ := ioutil.ReadFile(folderPath + "/" + is + "_s.txt")
 
 		response := ParseStringContent(string(fileS))
-		response.Label = orgFileName + "_" + strconv.Itoa(i)
+		response.Label = orgFileName + "_" + is
 
 		parser.AutoResponder.AddOrUpdateResponse(response)
 
