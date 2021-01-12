@@ -18,7 +18,7 @@ func Migrate(refAutoResponder responder.AutoResponder) {
 
 	filepath.Walk("./migration", func(path string, f os.FileInfo, err error) error {
 
-		if f.IsDir() {
+		if f == nil || f.IsDir() {
 			return nil
 		}
 

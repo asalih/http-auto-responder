@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strconv"
+	"path/filepath"
 	"strings"
 
 	"github.com/asalih/http-auto-responder/responder"
@@ -69,12 +69,16 @@ func (parser *SazParser) readZipFile(file *zip.File, folderPath string) {
 }
 
 func (parser *SazParser) parseAllFilesAndSave(folderPath string, orgFileName string) {
-	i := 1
-	for {
-		is := strconv.Itoa(i)
-		if len(is) < 2 {
-			is = "0" + is
-		}
+
+	matchFiles, err := filepath.Glob(folderPath + "/*_c.txt")
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for _, f := range matchFiles {
+		is := strings.ReplaceAll(filepath.Base(f), "_c.txt", "")
 
 		fileC, err := ioutil.ReadFile(folderPath + "/" + is + "_c.txt")
 		if err != nil {
@@ -92,8 +96,6 @@ func (parser *SazParser) parseAllFilesAndSave(folderPath string, orgFileName str
 		rule.ResponseID = response.ID
 
 		parser.AutoResponder.AddOrUpdateRule(rule)
-
-		i++
 	}
 }
 
