@@ -70,7 +70,7 @@ func (parser *SazParser) readZipFile(file *zip.File, folderPath string) {
 
 func (parser *SazParser) parseAllFilesAndSave(folderPath string, orgFileName string) {
 
-	matchFiles, err := filepath.Glob(folderPath + "/*_c.txt")
+	matchFiles, err := filepath.Glob(folderPath + "/*_s.txt")
 
 	if err != nil {
 		fmt.Println(err)
@@ -78,7 +78,7 @@ func (parser *SazParser) parseAllFilesAndSave(folderPath string, orgFileName str
 	}
 
 	for _, f := range matchFiles {
-		is := strings.ReplaceAll(filepath.Base(f), "_c.txt", "")
+		is := strings.ReplaceAll(filepath.Base(f), "_s.txt", "")
 
 		fileC, err := ioutil.ReadFile(folderPath + "/" + is + "_c.txt")
 		if err != nil {
