@@ -170,10 +170,19 @@ func (ar *JSONAutoResponder) GetRule(id uint64) *Rule {
 }
 
 //GetRules gets the rules with given url pattern and http method
-func (ar *JSONAutoResponder) GetRules() []*Rule {
+func (ar *JSONAutoResponder) GetRules(skip int) []*Rule {
 	values := []*Rule{}
+
+	if len(ar.Rules) <= skip {
+		return values
+	}
+
+	i := 0
 	for _, value := range ar.Rules {
-		values = append(values, value.rule)
+		if i > skip && i <= skip+takeSize {
+			values = append(values, value.rule)
+		}
+		i++
 	}
 
 	return values
@@ -215,10 +224,19 @@ func (ar *JSONAutoResponder) GetResponse(id uint64) *Response {
 }
 
 //GetResponses gets the response slice
-func (ar *JSONAutoResponder) GetResponses() []*Response {
+func (ar *JSONAutoResponder) GetResponses(skip int) []*Response {
 	values := []*Response{}
+
+	if len(ar.Responses) <= skip {
+		return values
+	}
+
+	i := 0
 	for _, value := range ar.Responses {
-		values = append(values, value.response)
+		if i > skip && i <= skip+takeSize {
+			values = append(values, value.response)
+		}
+		i++
 	}
 
 	return values

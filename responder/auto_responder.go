@@ -2,6 +2,8 @@ package responder
 
 import "github.com/asalih/http-auto-responder/utils"
 
+const takeSize = 50
+
 //AutoResponder implements an interface for autoresponder
 type AutoResponder interface {
 	//Init auto responder
@@ -13,7 +15,7 @@ type AutoResponder interface {
 	//GetRule gets the rule with given id
 	GetRule(id uint64) *Rule
 	//GetRules gets the rules with given url pattern and http method
-	GetRules() []*Rule
+	GetRules(skip int) []*Rule
 	//RemoveRule removes the rule
 	RemoveRule(id uint64)
 	//AddOrUpdateResponse adds or updates given rule
@@ -21,7 +23,7 @@ type AutoResponder interface {
 	//GetResponse gets the response with given id
 	GetResponse(id uint64) *Response
 	//GetResponses gets the response slice
-	GetResponses() []*Response
+	GetResponses(skip int) []*Response
 	//RemoveResponse removes the response with given id
 	RemoveResponse(id uint64)
 }

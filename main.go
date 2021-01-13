@@ -22,7 +22,7 @@ func main() {
 		return
 	}
 
-	parser.Migrate(autoResponder)
+	go parser.Migrate(autoResponder)
 
 	http.ListenAndServe(":"+strconv.Itoa(utils.Configuration.Port), web.NewAutoResponderHTTPHandler(autoResponder))
 }

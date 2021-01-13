@@ -117,7 +117,7 @@ func (ar *FarxAutoResponder) GetRule(id uint64) *Rule {
 }
 
 //GetRules gets the rules with given url pattern and http method
-func (ar *FarxAutoResponder) GetRules() []*Rule {
+func (ar *FarxAutoResponder) GetRules(skip int) []*Rule {
 	//NOOP FARX Auto responder no ability to rule.
 	return nil
 }
@@ -139,7 +139,7 @@ func (ar *FarxAutoResponder) GetResponse(id uint64) *Response {
 }
 
 //GetResponses gets the response slice
-func (ar *FarxAutoResponder) GetResponses() []*Response {
+func (ar *FarxAutoResponder) GetResponses(skip int) []*Response {
 	//NOOP FARX Auto responder no ability to rule.
 	return nil
 }

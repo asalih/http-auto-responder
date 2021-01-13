@@ -133,7 +133,7 @@ func (ar *DBAutoResponder) GetRule(id uint64) *Rule {
 }
 
 //GetRules gets the rules with given url pattern and http method
-func (ar *DBAutoResponder) GetRules() []*Rule {
+func (ar *DBAutoResponder) GetRules(skip int) []*Rule {
 	var rules []*Rule
 	ar.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(ruleBucketName)
@@ -146,6 +146,7 @@ func (ar *DBAutoResponder) GetRules() []*Rule {
 			return nil
 		}
 
+		i := 0
 		for k, v := c.First(); k != nil; k, v = c.Next() {
 
 			var rule Rule
@@ -153,7 +154,10 @@ func (ar *DBAutoResponder) GetRules() []*Rule {
 			if err != nil {
 				continue
 			}
-			rules = append(rules, &rule)
+			if i > skip && i <= skip+takeSize {
+				rules = append(rules, &rule)
+			}
+			i++
 		}
 
 		return nil
@@ -219,7 +223,7 @@ func (ar *DBAutoResponder) GetResponse(id uint64) *Response {
 }
 
 //GetResponses gets the response slice
-func (ar *DBAutoResponder) GetResponses() []*Response {
+func (ar *DBAutoResponder) GetResponses(skip int) []*Response {
 	var responses []*Response
 	ar.db.View(func(tx *bolt.Tx) error {
 
@@ -233,6 +237,7 @@ func (ar *DBAutoResponder) GetResponses() []*Response {
 			return nil
 		}
 
+		i := 0
 		for k, v := c.First(); k != nil; k, v = c.Next() {
 
 			var response Response
@@ -241,7 +246,10 @@ func (ar *DBAutoResponder) GetResponses() []*Response {
 			if err != nil {
 				continue
 			}
-			responses = append(responses, &response)
+			if i > skip && i <= skip+takeSize {
+				responses = append(responses, &response)
+			}
+			i++
 		}
 
 		return nil

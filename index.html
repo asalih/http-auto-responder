@@ -274,18 +274,38 @@ var defaultResponse = function(){return {statusCode:200, headers:[{key: "", valu
 
 var autoResponderVue = new Vue({
     el: "#autoResponderVue",
+    created () {
+        window.addEventListener('scroll', this.handleScroll);
+    },
+    destroyed () {
+        window.removeEventListener('scroll', this.handleScroll);
+    },
     data: {
         mt: ["CONTAINS", "WILDCARD", "EXACT", "NOT", "REGEX"],
         rules: [],
         responses: [],
         rule:defaultRule(),
         response:defaultResponse(),
-        errors:[]
+        errors:[],
+        skipResponses: -1,
+        skipRules: -1,
         },
     methods:{
+        handleScroll (event) {
+            if($(window).scrollTop()==($(document).height()-window.innerHeight)){
+                setTimeout(this.loadRules, 10);
+                setTimeout(this.loadResponses, 10);
+            }
+        },
         loadRules: function(){
-            $.get("/http-auto-responder/get-rules", function(data){
-                autoResponderVue.rules = data;
+            $.get("/http-auto-responder/get-rules?skip="+this.skipRules, function(data){
+                if(!data){
+                    return;
+                }
+                for (let i = 0; i < data.length; i++) {
+                    autoResponderVue.rules.push(data[i]);
+                }
+                autoResponderVue.skipRules = autoResponderVue.skipRules + data.length;
             });
         },
         removeRule: function(){
@@ -299,8 +319,15 @@ var autoResponderVue = new Vue({
             $("#ruleCreateModal").modal("show");
         },
         loadResponses: function(){
-            $.get("/http-auto-responder/get-responses", function(data){
-                autoResponderVue.responses = data;
+            $.get("/http-auto-responder/get-responses?skip="+this.skipResponses, function(data){
+                if(!data){
+                    return;
+                }
+                for (let i = 0; i < data.length; i++) {
+                    autoResponderVue.responses.push(data[i]);
+                }
+                
+                autoResponderVue.skipResponses = autoResponderVue.skipResponses + data.length;
             });
         },
         editResponse: function () {

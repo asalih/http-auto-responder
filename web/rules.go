@@ -31,7 +31,18 @@ func init() {
 	HTTPHandlerFuncs["/http-auto-responder/get-rules"] = func(w http.ResponseWriter, r *http.Request, ar responder.AutoResponder) {
 		w.Header().Set("Content-Type", "application/json")
 
-		rules := ar.GetRules()
+		skipq := r.URL.Query().Get("skip")
+		if skipq == "" {
+			skipq = "-1"
+		}
+
+		skip, err := strconv.ParseInt(skipq, 0, 64)
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		rules := ar.GetRules(int(skip))
 
 		encoder := json.NewEncoder(w)
 		encoder.Encode(rules)

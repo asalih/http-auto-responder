@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/asalih/http-auto-responder/responder"
@@ -99,10 +100,20 @@ func (parser *SazParser) parseAllFilesAndSave(folderPath string, orgFileName str
 	}
 }
 
-func (parser *SazParser) parseRule(content string) *responder.Rule {
-	firstLine := strings.Split(strings.Split(content, "\n")[0], " ")
+var hostRegex = regexp.MustCompile(`(?i)host: `)
 
-	return &responder.Rule{IsActive: true, URLPattern: firstLine[1], Method: firstLine[0], MatchType: "CONTAINS"}
+func (parser *SazParser) parseRule(content string) *responder.Rule {
+	linez := strings.Split(content, "\n")
+	uriLine := strings.Split(linez[0], " ")
+	hostLine := strings.TrimSpace(hostRegex.ReplaceAllString(linez[1], ""))
+
+	//hostline is a backup, first line might have full uri
+	uriPattern := uriLine[1]
+	if !strings.Contains(uriLine[1], hostLine) {
+		uriPattern = "http://" + hostLine + uriPattern
+	}
+
+	return &responder.Rule{IsActive: true, URLPattern: uriPattern, Method: uriLine[0], MatchType: "EXACT"}
 }
 
 //ParseStringContent parses given http content
